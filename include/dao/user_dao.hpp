@@ -15,10 +15,11 @@ struct User {
     std::string password_hash;      // 密码哈希，使用PBKDF2+盐（盐嵌入其中）
     std::string avatar;             // 头像URL，可选
     std::string motto;              // 个性签名，可选
-    int32_t gender = 0;             // 性别：0未知 1男 2女
-    int32_t is_robot = 0;           // 是否机器人：0否 1是
-    int32_t is_qiye = 0;            // 是否企业用户：0否 1是
-    int32_t status = 1;             // 账户状态：1正常 2禁用
+    std::string birthday;           // 生日，字符串格式"YYYY-MM-DD"
+    uint32_t gender = 0;            // 性别：0未知 1男 2女
+    uint32_t is_robot = 0;          // 是否机器人：0否 1是
+    uint32_t is_qiye = 0;           // 是否企业用户：0否 1是
+    uint32_t status = 1;            // 账户状态：1正常 2禁用
     std::time_t last_login_at = 0;  // 最后登录时间
     std::time_t created_at = 0;     // 创建时间
     std::time_t updated_at = 0;     // 更新时间
@@ -47,8 +48,9 @@ class UserDAO {
     static bool UpdateStatus(uint64_t id, int32_t status, std::string* err = nullptr);
 
     // 更新用户信息（昵称、头像、签名等）
-    static bool UpdateProfile(uint64_t id, const std::string& nickname, const std::string& avatar,
-                              const std::string& motto, std::string* err = nullptr);
+    static bool UpdateUserInfo(uint64_t id, const std::string& nickname, const std::string& avatar,
+                               const std::string& motto, const uint32_t gender,
+                               const std::string& birthday, std::string* err = nullptr);
 };
 
 }  // namespace CIM::dao

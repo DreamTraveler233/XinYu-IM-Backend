@@ -40,6 +40,7 @@ bool AuthApiModule::onServerReady() {
         dispatch->addServlet("/api/v1/auth/login", [](CIM::http::HttpRequest::ptr req,
                                                       CIM::http::HttpResponse::ptr res,
                                                       CIM::http::HttpSession::ptr /*session*/) {
+            CIM_LOG_DEBUG(g_logger) << "/api/v1/auth/login";
             /* 设置响应头 */
             res->setHeader("Content-Type", "application/json");
 
@@ -55,16 +56,15 @@ bool AuthApiModule::onServerReady() {
 
             /* 鉴权用户 */
             auto result = CIM::app::AuthService::Authenticate(mobile, password, platform);
-
             /*记录登录日志*/
             std::string err;
             if (result.user.id != 0) {
                 if (!CIM::app::AuthService::LogLogin(result, platform, &err)) {
-                    CIM_LOG_ERROR(g_logger)
-                        << "Log login failed for user id " << result.user.id << ": " << err;
+                    res->setStatus(CIM::http::HttpStatus::BAD_REQUEST);
+                    res->setBody(Error(400, "记录登录日志失败！"));
+                    return 0;
                 }
             }
-
             if (!result.ok) {
                 res->setStatus(CIM::http::HttpStatus::UNAUTHORIZED);
                 res->setBody(Error(401, result.err));
@@ -122,17 +122,27 @@ bool AuthApiModule::onServerReady() {
             }
 
             /* 注册用户 */
-            auto authResult = CIM::app::AuthService::Register(mobile, password, sms_code, nickname);
-            if (!authResult.ok) {
+            auto result = CIM::app::AuthService::Register(nickname, mobile, password, platform);
+
+            /*记录登录日志*/
+            std::string err;
+            if (result.user.id != 0) {
+                if (!CIM::app::AuthService::LogLogin(result, platform, &err)) {
+                    res->setStatus(CIM::http::HttpStatus::NOT_IMPLEMENTED);
+                    res->setBody(Error(500, "记录登录日志失败！"));
+                    return 0;
+                }
+            }
+            if (!result.ok) {
                 res->setStatus(CIM::http::HttpStatus::BAD_REQUEST);
-                res->setBody(Error(400, authResult.err));
+                res->setBody(Error(401, result.err));
                 return 0;
             }
 
             /* 签发JWT */
             std::string token;
             try {
-                token = SignJwt(std::to_string(authResult.user.id), g_jwt_expires_in->getValue());
+                token = SignJwt(std::to_string(result.user.id), g_jwt_expires_in->getValue());
             } catch (const std::exception& e) {
                 res->setStatus(CIM::http::HttpStatus::INTERNAL_SERVER_ERROR);
                 res->setBody(Error(500, "token sign failed"));

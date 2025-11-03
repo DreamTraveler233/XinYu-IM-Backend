@@ -18,9 +18,8 @@ struct AuthResult {
 class AuthService {
    public:
     // 注册新用户
-    static AuthResult Register(const std::string& mobile, const std::string& password,
-                               const std::string& email = std::string(),
-                               const std::string& nickname = std::string());
+    static AuthResult Register(const std::string& nickname, const std::string& mobile,
+                               const std::string& password, const std::string& platform);
 
     // 鉴权用户
     static AuthResult Authenticate(const std::string& mobile, const std::string& password,
@@ -30,7 +29,8 @@ class AuthService {
     static AuthResult Forget(const std::string& mobile, const std::string& new_password);
 
     // 登录日志
-    static bool LogLogin(const AuthResult& result, const std::string& platform, std::string* err = nullptr);
+    static bool LogLogin(const AuthResult& result, const std::string& platform,
+                         std::string* err = nullptr);
 };
 
 }  // namespace CIM::app

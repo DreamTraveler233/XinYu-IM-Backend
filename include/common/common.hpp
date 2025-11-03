@@ -15,10 +15,14 @@ std::string Error(int code, const std::string& msg);
 /* 解析请求体中的JSON字符串 */
 bool ParseBody(const std::string& body, Json::Value& out);
 
+// JWT 签发：返回签名后的 JWT 字符串
 std::string SignJwt(const std::string& uid, uint32_t expires_in);
 
 // JWT 校验：有效则返回 true 并输出 uid（字符串）
 bool VerifyJwt(const std::string& token, std::string* out_uid = nullptr);
+
+// JWT 是否过期
+bool IsJwtExpired(const std::string& token);
 
 }  // namespace CIM
 

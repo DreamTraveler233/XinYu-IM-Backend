@@ -2,10 +2,8 @@
 
 #include <mysql/mysql.h>
 
-#include "dao/sms_code_dao.hpp"
 #include "db/mysql.hpp"
 #include "macro.hpp"
-#include "sms_code_dao.hpp"
 
 namespace CIM::dao {
 

@@ -3,6 +3,7 @@
 #include "app/common_service.hpp"
 #include "base/macro.hpp"
 #include "common/common.hpp"
+#include "dao/user_dao.hpp"
 #include "db/mysql.hpp"
 #include "http/http_server.hpp"
 #include "http/http_servlet.hpp"
@@ -45,6 +46,22 @@ bool CommonApiModule::onServerReady() {
             if (ParseBody(req->getBody(), body)) {
                 mobile = CIM::JsonUtil::GetString(body, "mobile", mobile);
                 channel = CIM::JsonUtil::GetString(body, "channel", channel);
+            }
+
+            /*判断手机号是否已经注册*/
+            CIM::dao::User user;
+            if (channel == "register") {
+                if (CIM::dao::UserDAO::GetByMobile(mobile, user)) {
+                    res->setStatus(CIM::http::HttpStatus::BAD_REQUEST);
+                    res->setBody(Error(400, "手机号已注册!"));
+                    return 0;
+                }
+            } else if (channel == "forget_account") {
+                if (!CIM::dao::UserDAO::GetByMobile(mobile, user)) {
+                    res->setStatus(CIM::http::HttpStatus::BAD_REQUEST);
+                    res->setBody(Error(400, "手机号未注册!"));
+                    return 0;
+                }
             }
 
             /* 发送短信验证码 */

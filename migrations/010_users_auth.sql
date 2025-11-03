@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
   email             VARCHAR(128),                                 -- 邮箱，可选，唯一，用于找回密码
   nickname          VARCHAR(64) NOT NULL,                         -- 昵称，显示名称
   password_hash     VARCHAR(255) NOT NULL,                        -- 密码哈希，使用PBKDF2+盐
-  password_salt     VARCHAR(64) NOT NULL,                         -- 密码盐，十六进制字符串
   avatar            VARCHAR(255),                                 -- 头像URL，可选
   motto             VARCHAR(255),                                 -- 个性签名，可选
   gender            TINYINT UNSIGNED NOT NULL DEFAULT 0,         -- 性别：0未知 1男 2女
@@ -33,21 +32,6 @@ CREATE TABLE IF NOT EXISTS user_settings (
   created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 创建时间
   updated_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 更新时间
   CONSTRAINT fk_user_settings_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE -- 外键约束，级联删除
-) ENGINE=InnoDB;
-
--- 用户令牌：存储JWT访问令牌，用于API认证
-CREATE TABLE IF NOT EXISTS user_tokens (
-  id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,       -- 令牌记录ID
-  user_id       BIGINT UNSIGNED NOT NULL,                         -- 用户ID
-  access_token  CHAR(64) NOT NULL,                                 -- 访问令牌，固定64字符
-  platform      VARCHAR(32) NOT NULL DEFAULT 'web',                -- 平台：web, mobile等
-  client_ip     VARCHAR(45),                                       -- 客户端IP地址
-  expires_at    DATETIME NOT NULL,                                 -- 过期时间
-  revoked_at    DATETIME,                                          -- 撤销时间（软删除）
-  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,      -- 创建时间
-  UNIQUE KEY uq_user_tokens_token (access_token),                 -- 令牌唯一索引
-  KEY idx_user_tokens_user (user_id, platform, expires_at),       -- 复合索引，便于查询
-  CONSTRAINT fk_user_tokens_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE -- 外键约束
 ) ENGINE=InnoDB;
 
 -- 用户OAuth账户：存储第三方登录信息，如微信、QQ等

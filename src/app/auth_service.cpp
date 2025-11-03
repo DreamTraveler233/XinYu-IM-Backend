@@ -9,16 +9,9 @@
 namespace CIM::app {
 static auto g_logger = CIM_LOG_NAME("root");
 
-AuthResult AuthService::Register(const std::string& mobile, const std::string& password,
-                                 const std::string& email, const std::string& nickname) {
+AuthResult AuthService::Register(const std::string& nickname, const std::string& mobile,
+                                 const std::string& password, const std::string& platform) {
     AuthResult result;
-
-    /*检查手机号是否已注册*/
-    CIM::dao::User exist;
-    if (CIM::dao::UserDAO::GetByMobile(mobile, exist)) {
-        result.err = "手机号已被注册！";
-        return result;
-    }
 
     /*使用Base64解码密码并RSA解密*/
     // Base64 解码
@@ -48,10 +41,9 @@ AuthResult AuthService::Register(const std::string& mobile, const std::string& p
 
     /*创建用户*/
     CIM::dao::User u;
-    u.mobile = mobile;
-    u.email = email;
-    u.password_hash = ph;
     u.nickname = nickname;
+    u.mobile = mobile;
+    u.password_hash = ph;
 
     uint64_t new_id = 0;
     std::string err;
