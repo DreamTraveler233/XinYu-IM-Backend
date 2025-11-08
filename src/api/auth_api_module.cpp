@@ -2,6 +2,7 @@
 
 #include <jwt-cpp/jwt.h>
 
+#include "app/auth_service.hpp"
 #include "app/common_service.hpp"
 #include "app/user_service.hpp"
 #include "base/macro.hpp"
@@ -51,12 +52,12 @@ bool AuthApiModule::onServerReady() {
             }
 
             /* 鉴权用户 */
-            auto result = CIM::app::UserService::Authenticate(mobile, password, platform);
+            auto result = CIM::app::AuthService::Authenticate(mobile, password, platform);
 
             /*只要用户存在，无论鉴权成功还是失败都要记录登录日志*/
             std::string err;
             if (result.data.id != 0) {
-                auto LogLogin_res = CIM::app::UserService::LogLogin(result, platform);
+                auto LogLogin_res = CIM::app::AuthService::LogLogin(result, platform);
                 if (!LogLogin_res.ok) {
                     res->setStatus(ToHttpStatus(LogLogin_res.code));
                     res->setBody(Error(LogLogin_res.code, LogLogin_res.err));
@@ -64,7 +65,7 @@ bool AuthApiModule::onServerReady() {
                 }
 
                 // 更新在线状态为在线
-                auto goOnline_res = CIM::app::UserService::GoOnline(result.data.id);
+                auto goOnline_res = CIM::app::AuthService::GoOnline(result.data.id);
                 if (!goOnline_res.ok) {
                     res->setStatus(ToHttpStatus(goOnline_res.code));
                     res->setBody(Error(goOnline_res.code, goOnline_res.err));
@@ -121,12 +122,12 @@ bool AuthApiModule::onServerReady() {
             }
 
             /* 注册用户 */
-            auto result = CIM::app::UserService::Register(nickname, mobile, password, platform);
+            auto result = CIM::app::AuthService::Register(nickname, mobile, password, platform);
 
             /*只要创建用户成功就记录登录日志*/
             std::string err;
             if (result.data.id != 0) {
-                auto LogLogin_res = CIM::app::UserService::LogLogin(result, platform);
+                auto LogLogin_res = CIM::app::AuthService::LogLogin(result, platform);
                 if (!LogLogin_res.ok) {
                     res->setStatus(ToHttpStatus(LogLogin_res.code));
                     res->setBody(Error(LogLogin_res.code, "记录登录日志失败！"));
@@ -134,7 +135,7 @@ bool AuthApiModule::onServerReady() {
                 }
 
                 // 更新在线状态为在线
-                auto goOnline_res = CIM::app::UserService::GoOnline(result.data.id);
+                auto goOnline_res = CIM::app::AuthService::GoOnline(result.data.id);
                 if (!goOnline_res.ok) {
                     res->setStatus(ToHttpStatus(goOnline_res.code));
                     res->setBody(Error(goOnline_res.code, "更新在线状态失败！"));
@@ -188,7 +189,7 @@ bool AuthApiModule::onServerReady() {
             }
 
             /* 找回密码 */
-            auto forgetResult = CIM::app::UserService::Forget(mobile, password);
+            auto forgetResult = CIM::app::AuthService::Forget(mobile, password);
             if (!forgetResult.ok) {
                 res->setStatus(ToHttpStatus(forgetResult.code));
                 res->setBody(Error(forgetResult.code, forgetResult.err));

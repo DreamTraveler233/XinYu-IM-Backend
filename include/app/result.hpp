@@ -1,7 +1,14 @@
 #ifndef __CIM_APP_RESULT_HPP__
 #define __CIM_APP_RESULT_HPP__
 
-#include <string>
+#include "dao/contact_apply_dao.hpp"
+#include "dao/contact_dao.hpp"
+#include "dao/contact_group_dao.hpp"
+#include "dao/sms_code_dao.hpp"
+#include "dao/talk_sessions_dao.hpp"
+#include "dao/user_dao.hpp"
+#include "dao/user_login_log_dao.hpp"
+#include "dao/user_settings_dao.hpp"
 
 namespace CIM::app {
 
@@ -13,7 +20,20 @@ struct Result {
     T data;           // 成功时的载荷
 };
 
-using ResultVoid = Result<int>;  // data 不用时可用占位
+using VoidResult = Result<int>;  // data 不用时可用占位
+using StatusResult = Result<std::string>;
+using ApplyCountResult = Result<uint64_t>;
+using UserResult = Result<CIM::dao::User>;
+using SmsCodeResult = Result<CIM::dao::SmsCode>;
+using UserInfoResult = Result<CIM::dao::UserInfo>;
+using ConfigInfoResult = Result<CIM::dao::ConfigInfo>;
+using ContactGroupResult = Result<CIM::dao::ContactGroup>;
+using ContactDetailsResult = Result<CIM::dao::ContactDetails>;
+using ContactListResult = Result<std::vector<CIM::dao::ContactItem>>;
+using ContactApplyListResult = Result<std::vector<CIM::dao::ContactApplyItem>>;
+using ContactGroupListResult = Result<std::vector<CIM::dao::ContactGroupItem>>;
+using TalkSessionListResult = Result<std::vector<CIM::dao::TalkSessionItem>>;
+
 }  // namespace CIM::app
 
 #endif  // __CIM_APP_RESULT_HPP__

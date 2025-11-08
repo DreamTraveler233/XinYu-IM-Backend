@@ -5,16 +5,9 @@
 #include <optional>
 #include <string>
 
-#include "dao/user_dao.hpp"
-#include "dao/user_login_log_dao.hpp"
-#include "dao/user_settings_dao.hpp"
 #include "result.hpp"
 
 namespace CIM::app {
-using UserResult = Result<CIM::dao::User>;
-using StatusResult = Result<std::string>;
-using UserInfoResult = Result<CIM::dao::UserInfo>;
-using ConfigInfoResult = Result<CIM::dao::ConfigInfo>;
 
 class UserService {
    public:
@@ -22,46 +15,29 @@ class UserService {
     static UserResult LoadUserInfo(const uint64_t uid);
 
     //  更新用户密码
-    static ResultVoid UpdatePassword(const uint64_t uid, const std::string& old_password,
+    static VoidResult UpdatePassword(const uint64_t uid, const std::string& old_password,
                                      const std::string& new_password);
 
     // 更新用户信息
-    static ResultVoid UpdateUserInfo(const uint64_t uid, const std::string& nickname,
+    static VoidResult UpdateUserInfo(const uint64_t uid, const std::string& nickname,
                                      const std::string& avatar, const std::string& motto,
                                      const uint32_t gender, const std::string& birthday);
 
     // 更新手机号
-    static ResultVoid UpdateMobile(const uint64_t uid, const std::string& password,
+    static VoidResult UpdateMobile(const uint64_t uid, const std::string& password,
                                    const std::string& new_mobile);
 
     // 判断手机号是否已注册
     static UserResult GetUserByMobile(const std::string& mobile, const std::string& channel);
 
-    // 注册新用户
-    static UserResult Register(const std::string& nickname, const std::string& mobile,
-                               const std::string& password, const std::string& platform);
-
-    // 鉴权用户
-    static UserResult Authenticate(const std::string& mobile, const std::string& password,
-                                   const std::string& platform);
-
-    // 找回密码
-    static UserResult Forget(const std::string& mobile, const std::string& new_password);
-
-    // 记录登录日志
-    static ResultVoid LogLogin(const UserResult& result, const std::string& platform);
-
-    // 用户上线
-    static ResultVoid GoOnline(const uint64_t id);
-
     // 用户下线
-    static ResultVoid Offline(const uint64_t id);
+    static VoidResult Offline(const uint64_t id);
 
     // 获取用户在线状态
     static StatusResult GetUserOnlineStatus(const uint64_t id);
 
     // 保存用户设置
-    static ResultVoid SaveConfigInfo(const uint64_t user_id, const std::string& theme_mode,
+    static VoidResult SaveConfigInfo(const uint64_t user_id, const std::string& theme_mode,
                                      const std::string& theme_bag_img,
                                      const std::string& theme_color,
                                      const std::string& notify_cue_tone,

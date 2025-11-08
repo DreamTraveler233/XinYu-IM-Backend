@@ -7,7 +7,6 @@
 #include "result.hpp"
 
 namespace CIM::app {
-using SmsCodeResult = Result<CIM::dao::SmsCode>;
 
 class CommonService {
    public:

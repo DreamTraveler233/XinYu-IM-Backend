@@ -57,9 +57,9 @@ ContactListResult ContactService::ListFriends(const uint64_t user_id) {
     return result;
 }
 
-ResultVoid ContactService::CreateContactApply(uint64_t from_id, uint64_t to_id,
+VoidResult ContactService::CreateContactApply(uint64_t from_id, uint64_t to_id,
                                               const std::string& remark) {
-    ResultVoid result;
+    VoidResult result;
     std::string err;
 
     CIM::dao::ContactApply apply;
@@ -110,8 +110,8 @@ ContactApplyListResult ContactService::ListContactApplies(uint64_t user_id) {
     return result;
 }
 
-ResultVoid ContactService::AgreeApply(const uint64_t apply_id, const std::string& remark) {
-    ResultVoid result;
+VoidResult ContactService::AgreeApply(const uint64_t apply_id, const std::string& remark) {
+    VoidResult result;
     std::string err;
 
     // 1. 更新申请状态为已同意
@@ -207,8 +207,8 @@ ResultVoid ContactService::AgreeApply(const uint64_t apply_id, const std::string
     return result;
 }
 
-ResultVoid ContactService::RejectApply(const uint64_t apply_id, const std::string& remark) {
-    ResultVoid result;
+VoidResult ContactService::RejectApply(const uint64_t apply_id, const std::string& remark) {
+    VoidResult result;
     std::string err;
 
     if (!CIM::dao::ContactApplyDAO::RejectApply(apply_id, remark, &err)) {
@@ -223,9 +223,9 @@ ResultVoid ContactService::RejectApply(const uint64_t apply_id, const std::strin
     return result;
 }
 
-ResultVoid ContactService::EditContactRemark(const uint64_t user_id, const uint64_t contact_id,
+VoidResult ContactService::EditContactRemark(const uint64_t user_id, const uint64_t contact_id,
                                              const std::string& remark) {
-    ResultVoid result;
+    VoidResult result;
     std::string err;
 
     if (!CIM::dao::ContactDAO::EditRemark(user_id, contact_id, remark, &err)) {
@@ -240,8 +240,8 @@ ResultVoid ContactService::EditContactRemark(const uint64_t user_id, const uint6
     return result;
 }
 
-ResultVoid ContactService::DeleteContact(const uint64_t user_id, const uint64_t contact_id) {
-    ResultVoid result;
+VoidResult ContactService::DeleteContact(const uint64_t user_id, const uint64_t contact_id) {
+    VoidResult result;
     std::string err;
 
     // 查询联系人所在分组
@@ -297,10 +297,10 @@ ResultVoid ContactService::DeleteContact(const uint64_t user_id, const uint64_t 
     return result;
 }
 
-ResultVoid ContactService::SaveContactGroup(
+VoidResult ContactService::SaveContactGroup(
     const uint64_t user_id,
     const std::vector<std::tuple<uint64_t, uint64_t, std::string>>& groupItems) {
-    ResultVoid result;
+    VoidResult result;
     std::string err;
 
     std::unordered_set<uint64_t> ids_seen;
@@ -391,9 +391,9 @@ ContactGroupListResult ContactService::GetContactGroupLists(const uint64_t user_
     return result;
 }
 
-ResultVoid ContactService::ChangeContactGroup(const uint64_t user_id, const uint64_t contact_id,
+VoidResult ContactService::ChangeContactGroup(const uint64_t user_id, const uint64_t contact_id,
                                               const uint64_t group_id) {
-    ResultVoid result;
+    VoidResult result;
     std::string err;
 
     // 查询好友原先的分组

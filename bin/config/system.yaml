@@ -20,9 +20,9 @@ mysql.dbs:
     default:
         host: "localhost"
         port: 3306
-        user: "cim"
-        passwd: "Cim@642157"
-        dbname: "cim_db"
+        user: "im"
+        passwd: "Im@642157"
+        dbname: "im_db"
         pool: 10
 
 # 短信服务配置
