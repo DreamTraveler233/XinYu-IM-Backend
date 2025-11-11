@@ -30,6 +30,7 @@ using ConfigInfoResult = Result<CIM::dao::ConfigInfo>;
 using ContactGroupResult = Result<CIM::dao::ContactGroup>;
 using ContactDetailsResult = Result<CIM::dao::ContactDetails>;
 using ContactListResult = Result<std::vector<CIM::dao::ContactItem>>;
+using TalkSessionListResult = Result<std::vector<CIM::dao::TalkSessionItem>>;
 using ContactApplyListResult = Result<std::vector<CIM::dao::ContactApplyItem>>;
 using ContactGroupListResult = Result<std::vector<CIM::dao::ContactGroupItem>>;
 
