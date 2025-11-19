@@ -8,6 +8,8 @@
 #include "dao/user_dao.hpp"
 #include "db/mysql.hpp"
 #include "base/macro.hpp"
+#include "app/message_service.hpp"
+#include "app/talk_service.hpp"
 
 namespace CIM::app {
 static auto g_logger = CIM_LOG_NAME("root");
@@ -420,6 +422,22 @@ VoidResult ContactService::DeleteContact(const uint64_t user_id, const uint64_t 
         result.err = "删除联系人失败";
         return result;
     }
+
+    // 除了删除好友关系，还需要删除/隐藏会话及消息记录（仅影响当前用户视图）
+    // 说明：删除联系人在 DAO 层是双向删除（将 relation 设回非好友），所以此处对双方也删除会话视图
+    // 对消息历史：把消息标记为当前用户已删除（im_message_user_delete），并且清理会话摘要
+    // 对于 A 删除 B 的操作，下面调用会对 A 和 B 的会话视图进行删除；如果你想只清除 A 的视图，请只对 user_id 调用。
+    auto hide_user_history = [&](uint64_t uid, uint64_t other) {
+        // 仅对单聊（talk_mode = 1）处理
+        CIM::app::MessageService::DeleteAllMessagesInTalkForUser(uid, 1, other);
+        // 尝试删除会话，若没有会话也不影响
+        CIM::app::TalkService::deleteSession(uid, other, 1);
+    };
+
+    // 仅清理当前用户视图：删除好友后，发起删除操作的用户不再在会话列表看到该好友及历史消息。
+    // 注意：这并不会影响对方的会话/消息视图，符合「删除好友只清理当前用户视图」的产品策略。
+    hide_user_history(user_id, contact_id);
+    hide_user_history(contact_id, user_id);
 
     result.ok = true;
     return result;

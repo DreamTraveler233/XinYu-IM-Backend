@@ -77,7 +77,9 @@ static std::vector<CIM::http::WSSession::ptr> CollectSessions(uint64_t uid) {
         out.reserve(s_ws_conns.size());
         for (auto& kv : s_ws_conns) {
             const auto& item = kv.second;
-            if (item.ctx.uid != uid) continue;
+            if (item.ctx.uid != uid) {
+                continue;
+            }
             if (auto sp = item.weak.lock()) {
                 out.push_back(std::move(sp));
             }

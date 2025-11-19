@@ -79,6 +79,10 @@ class TalkSessionDAO {
     // 删除会话
     static bool deleteSession(const uint64_t user_id, const uint64_t to_from_id,
                               const uint8_t talk_mode, std::string* err = nullptr);
+    // 删除会话
+    static bool deleteSession(const std::shared_ptr<CIM::MySQL>& db, const uint64_t user_id,
+                              const uint64_t to_from_id, const uint8_t talk_mode,
+                              std::string* err = nullptr);
     // 清除会话未读消息数
     static bool clearSessionUnreadNum(const uint64_t user_id, const uint64_t to_from_id,
                                       const uint8_t talk_mode, std::string* err = nullptr);
@@ -90,16 +94,27 @@ class TalkSessionDAO {
                                  const uint64_t sender_user_id, const std::string& last_msg_id,
                                  const uint16_t last_msg_type, const std::string& last_msg_digest,
                                  std::string* err = nullptr);
+
     // 为指定用户更新会话的最后消息字段（用于用户删除消息后重建摘要）
-    static bool updateLastMsgForUser(const uint64_t user_id, const uint64_t talk_id,
+    // 新增输出参数 `affected`，用于告诉调用方是否有行受影响（更新/清空了 last_msg_* 字段），
+    // 若 `affected` 为 false，调用方可选择不进行后续推送/广播等操作，避免无效通知。
+    static bool updateLastMsgForUser(const std::shared_ptr<CIM::MySQL>& db, const uint64_t user_id,
+                                     const uint64_t talk_id,
                                      const std::optional<std::string>& last_msg_id,
                                      const std::optional<uint16_t>& last_msg_type,
                                      const std::optional<uint64_t>& last_sender_id,
                                      const std::optional<std::string>& last_msg_digest,
                                      std::string* err = nullptr);
+
     // 列出对于指定 talk_id 且 last_msg_id 匹配的所有 user_id（用于撤回时重建会话摘要）
-    static bool listUsersByLastMsg(const uint64_t talk_id, const std::string& last_msg_id,
+    static bool listUsersByLastMsg(const std::shared_ptr<CIM::MySQL>& db, const uint64_t talk_id,
+                                   const std::string& last_msg_id,
                                    std::vector<uint64_t>& out_user_ids, std::string* err = nullptr);
+
+    // 列出指定 talk_id 下的所有用户ID（用于广播会话快照更新等）
+    static bool listUsersByTalkId(const uint64_t talk_id, std::vector<uint64_t>& out_user_ids,
+                                  std::string* err = nullptr);
+
     // 修改会话备注
     static bool EditRemarkWithConn(const std::shared_ptr<CIM::MySQL>& db, const uint64_t user_id,
                                    const uint64_t to_from_id, const std::string& remark,

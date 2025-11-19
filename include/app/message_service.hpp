@@ -16,22 +16,31 @@ namespace CIM::app {
 class MessageService {
    public:
     // 获取当前会话消息（按 sequence DESC 返回最新 -> 较旧）。
-    static MessageRecordPageResult LoadRecords(const uint64_t current_user_id, const uint8_t talk_mode,
-                                               const uint64_t to_from_id, uint64_t cursor,
-                                               uint32_t limit);
+    static MessageRecordPageResult LoadRecords(const uint64_t current_user_id,
+                                               const uint8_t talk_mode, const uint64_t to_from_id,
+                                               uint64_t cursor, uint32_t limit);
 
     // 获取当前会话历史消息（支持按 msg_type 过滤，0=全部）。
-    static MessageRecordPageResult LoadHistoryRecords(const uint64_t current_user_id, const uint8_t talk_mode,
-                                                      const uint64_t to_from_id, const uint16_t msg_type,
-                                                      uint64_t cursor, uint32_t limit);
+    static MessageRecordPageResult LoadHistoryRecords(const uint64_t current_user_id,
+                                                      const uint8_t talk_mode,
+                                                      const uint64_t to_from_id,
+                                                      const uint16_t msg_type, uint64_t cursor,
+                                                      uint32_t limit);
 
     // 获取转发消息记录（传入一组消息ID，返回消息详情；不分页）。
-    static MessageRecordListResult LoadForwardRecords(const uint64_t current_user_id, const uint8_t talk_mode,
+    static MessageRecordListResult LoadForwardRecords(const uint64_t current_user_id,
+                                                      const uint8_t talk_mode,
                                                       const std::vector<std::string>& msg_ids);
 
     // 删除聊天记录（仅对本人视图生效）。
     static VoidResult DeleteMessages(const uint64_t current_user_id, const uint8_t talk_mode,
-                                     const uint64_t to_from_id, const std::vector<std::string>& msg_ids);
+                                     const uint64_t to_from_id,
+                                     const std::vector<std::string>& msg_ids);
+
+   // 删除会话中该用户的所有消息（仅影响该用户视图）并删除会话视图
+   static VoidResult DeleteAllMessagesInTalkForUser(const uint64_t current_user_id,
+                                       const uint8_t talk_mode,
+                                       const uint64_t to_from_id);
 
     // 撤回消息（仅发送者可撤回，后续可扩展管理员权限）。
     static VoidResult RevokeMessage(const uint64_t current_user_id, const uint8_t talk_mode,
@@ -50,7 +59,8 @@ class MessageService {
                                            const std::string& content_text,
                                            const std::string& extra,
                                            const std::string& quote_msg_id,
-                                           const std::string& msg_id);
+                                           const std::string& msg_id,
+                                           const std::vector<uint64_t>& mentioned_user_ids);
 
    private:
     // 根据 talk_mode 与对象ID 获取会话 talk_id（不存在返回 0）。

@@ -1,5 +1,7 @@
 #include "dao/talk_session_dao.hpp"
 
+#include <sstream>
+
 #include "db/mysql.hpp"
 #include "util/time_util.hpp"
 
@@ -311,6 +313,30 @@ bool TalkSessionDAO::deleteSession(const uint64_t user_id, const uint64_t to_fro
     }
     return true;
 }
+bool TalkSessionDAO::deleteSession(const std::shared_ptr<CIM::MySQL>& db, const uint64_t user_id,
+                                   const uint64_t to_from_id, const uint8_t talk_mode,
+                                   std::string* err) {
+    if (!db) {
+        if (err) *err = "get mysql connection failed";
+        return false;
+    }
+    const char* sql =
+        "UPDATE im_talk_session SET deleted_at = NOW() "
+        "WHERE user_id = ? AND to_from_id = ? AND talk_mode = ? AND deleted_at IS NULL";
+    auto stmt = db->prepare(sql);
+    if (!stmt) {
+        if (err) *err = "prepare sql failed";
+        return false;
+    }
+    stmt->bindUint64(1, user_id);
+    stmt->bindUint64(2, to_from_id);
+    stmt->bindUint8(3, talk_mode);
+    if (stmt->execute() != 0) {
+        if (err) *err = stmt->getErrStr();
+        return false;
+    }
+    return true;
+}
 bool TalkSessionDAO::clearSessionUnreadNum(const uint64_t user_id, const uint64_t to_from_id,
                                            const uint8_t talk_mode, std::string* err) {
     auto db = CIM::MySQLMgr::GetInstance()->get(kDBName);
@@ -336,13 +362,13 @@ bool TalkSessionDAO::clearSessionUnreadNum(const uint64_t user_id, const uint64_
     return true;
 }
 
-bool TalkSessionDAO::updateLastMsgForUser(const uint64_t user_id, const uint64_t talk_id,
+bool TalkSessionDAO::updateLastMsgForUser(const std::shared_ptr<CIM::MySQL>& db,
+                                          const uint64_t user_id, const uint64_t talk_id,
                                           const std::optional<std::string>& last_msg_id,
                                           const std::optional<uint16_t>& last_msg_type,
                                           const std::optional<uint64_t>& last_sender_id,
                                           const std::optional<std::string>& last_msg_digest,
                                           std::string* err) {
-    auto db = CIM::MySQLMgr::GetInstance()->get(kDBName);
     if (!db) {
         if (err) *err = "get mysql connection failed";
         return false;
@@ -388,9 +414,38 @@ bool TalkSessionDAO::updateLastMsgForUser(const uint64_t user_id, const uint64_t
     return true;
 }
 
-bool TalkSessionDAO::listUsersByLastMsg(const uint64_t talk_id, const std::string& last_msg_id,
-                                        std::vector<uint64_t>& out_user_ids,
-                                        std::string* err) {
+bool TalkSessionDAO::listUsersByLastMsg(const std::shared_ptr<CIM::MySQL>& db,
+                                        const uint64_t talk_id, const std::string& last_msg_id,
+                                        std::vector<uint64_t>& out_user_ids, std::string* err) {
+    out_user_ids.clear();
+    if (!db) {
+        if (err) *err = "get mysql connection failed";
+        return false;
+    }
+
+    const char* sql =
+        "SELECT user_id FROM im_talk_session WHERE talk_id = ? AND last_msg_id = ? AND deleted_at "
+        "IS NULL";
+    auto stmt = db->prepare(sql);
+    if (!stmt) {
+        if (err) *err = "prepare sql failed";
+        return false;
+    }
+    stmt->bindUint64(1, talk_id);
+    stmt->bindString(2, last_msg_id);
+    auto res = stmt->query();
+    if (!res) {
+        if (err) *err = "query failed";
+        return false;
+    }
+    while (res->next()) {
+        out_user_ids.push_back(res->getUint64(0));
+    }
+    return true;
+}
+
+bool TalkSessionDAO::listUsersByTalkId(const uint64_t talk_id, std::vector<uint64_t>& out_user_ids,
+                                       std::string* err) {
     out_user_ids.clear();
     auto db = CIM::MySQLMgr::GetInstance()->get(kDBName);
     if (!db) {
@@ -399,14 +454,13 @@ bool TalkSessionDAO::listUsersByLastMsg(const uint64_t talk_id, const std::strin
     }
 
     const char* sql =
-        "SELECT user_id FROM im_talk_session WHERE talk_id = ? AND last_msg_id = ? AND deleted_at IS NULL";
+        "SELECT user_id FROM im_talk_session WHERE talk_id = ? AND deleted_at IS NULL";
     auto stmt = db->prepare(sql);
     if (!stmt) {
         if (err) *err = "prepare sql failed";
         return false;
     }
     stmt->bindUint64(1, talk_id);
-    stmt->bindString(2, last_msg_id);
     auto res = stmt->query();
     if (!res) {
         if (err) *err = "query failed";

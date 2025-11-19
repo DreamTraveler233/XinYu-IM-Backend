@@ -30,18 +30,9 @@ class TalkDao {
    static bool getSingleTalkId(const uint64_t uid1, const uint64_t uid2, uint64_t& out_talk_id,
                         std::string* err = nullptr);
 
-   // db 版本：在已有事务/连接中查询单聊 talk_id（不获取新的连接）。
-   static bool getSingleTalkId(const std::shared_ptr<CIM::MySQL>& db, const uint64_t uid1,
-                        const uint64_t uid2, uint64_t& out_talk_id,
-                        std::string* err = nullptr);
-
     // 仅查询：获取群聊 talk_id。
    static bool getGroupTalkId(const uint64_t group_id, uint64_t& out_talk_id,
                         std::string* err = nullptr);
-
-   // db 版本：在已有事务/连接中查询群聊 talk_id。
-   static bool getGroupTalkId(const std::shared_ptr<CIM::MySQL>& db, const uint64_t group_id,
-                        uint64_t& out_talk_id, std::string* err = nullptr);
 };
 
 }  // namespace CIM::dao

@@ -6,10 +6,10 @@ namespace CIM::dao {
 
 static constexpr const char* kDBName = "default";
 
-bool MessageMentionDao::AddMentions(const std::string& msg_id,
+bool MessageMentionDao::AddMentions(const std::shared_ptr<CIM::MySQL>& db,
+                                    const std::string& msg_id,
                                     const std::vector<uint64_t>& mentioned_user_ids,
                                     std::string* err) {
-    auto db = CIM::MySQLMgr::GetInstance()->get(kDBName);
     if (!db) {
         if (err) *err = "get mysql connection failed";
         return false;
@@ -29,6 +29,32 @@ bool MessageMentionDao::AddMentions(const std::string& msg_id,
             if (err) *err = stmt->getErrStr();
             return false;
         }
+    }
+    return true;
+}
+
+bool MessageMentionDao::GetMentions(const std::string& msg_id, std::vector<uint64_t>& out,
+                                    std::string* err) {
+    out.clear();
+    auto db = CIM::MySQLMgr::GetInstance()->get(kDBName);
+    if (!db) {
+        if (err) *err = "get mysql connection failed";
+        return false;
+    }
+    const char* sql = "SELECT mentioned_user_id FROM im_message_mention WHERE msg_id=?";
+    auto stmt = db->prepare(sql);
+    if (!stmt) {
+        if (err) *err = "prepare sql failed";
+        return false;
+    }
+    stmt->bindString(1, msg_id);
+    auto res = stmt->query();
+    if (!res) {
+        if (err) *err = "query failed";
+        return false;
+    }
+    while (res->next()) {
+        out.push_back(res->getUint64(0));
     }
     return true;
 }

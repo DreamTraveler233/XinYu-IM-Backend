@@ -72,6 +72,13 @@ class MessageDao {
                                          const uint16_t msg_type, std::vector<Message>& out,
                                          std::string* err = nullptr);
 
+    // 与 ListRecentDesc 功能类似
+    static bool ListRecentDescWithFilter(const std::shared_ptr<CIM::MySQL>& db,
+                                         const uint64_t talk_id, const uint64_t anchor_seq,
+                                         const size_t limit, const uint64_t user_id,
+                                         const uint16_t msg_type, std::vector<Message>& out,
+                                         std::string* err = nullptr);
+
     // 会话内获取大于某序号的消息（升序）。
     static bool ListAfterAsc(const uint64_t talk_id, const uint64_t after_seq, const size_t limit,
                              std::vector<Message>& out, std::string* err = nullptr);
@@ -85,8 +92,8 @@ class MessageDao {
                                    std::vector<Message>& out, std::string* err = nullptr);
 
     // 撤回消息（状态置 1），仅当当前状态为正常(2)。
-    static bool Revoke(const std::string& msg_id, const uint64_t user_id,
-                       std::string* err = nullptr);
+    static bool Revoke(const std::shared_ptr<CIM::MySQL>& db, const std::string& msg_id,
+                       const uint64_t user_id, std::string* err = nullptr);
 };
 
 }  // namespace CIM::dao

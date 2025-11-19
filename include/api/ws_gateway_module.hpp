@@ -15,7 +15,8 @@ class WsGatewayModule : public CIM::Module {
     // event: 事件名（如 "im.message"）
     // payload: 事件数据（JSON对象）
     // ackid: 可选去重/确认ID（前端会自动ack）
-    static void PushToUser(uint64_t uid, const std::string& event, const Json::Value& payload,
+    static void PushToUser(uint64_t uid, const std::string& event,
+                           const Json::Value& payload = Json::Value(),
                            const std::string& ackid = "");
 
     // 主动推送一条 IM 消息事件
