@@ -191,71 +191,7 @@ bool MessageDao::ListRecentDescWithFilter(const uint64_t talk_id, const uint64_t
                                           const uint16_t msg_type, std::vector<Message>& out,
                                           std::string* err) {
     auto db = CIM::MySQLMgr::GetInstance()->get(kDBName);
-    if (!db) {
-        if (err) *err = "get mysql connection failed";
-        return false;
-    }
-    std::ostringstream oss;
-    oss << "SELECT " << kSelectCols << " FROM im_message m WHERE talk_id=?";
-    if (anchor_seq > 0) oss << " AND sequence<?";
-    if (msg_type != 0) oss << " AND msg_type=?";
-    // 过滤掉已撤回的消息（is_revoked != 2 表示已被撤回/不可见）
-    oss << " AND m.is_revoked=2";
-    // 过滤掉用户已删除的消息
-    if (user_id != 0) {
-        oss << " AND NOT EXISTS(SELECT 1 FROM im_message_user_delete d WHERE d.msg_id=m.id AND "
-               "d.user_id=?)";
-    }
-    oss << " ORDER BY sequence DESC LIMIT ?";
-
-    auto stmt = db->prepare(oss.str().c_str());
-    if (!stmt) {
-        if (err) *err = "prepare sql failed";
-        return false;
-    }
-
-    // 逐个按顺序绑定参数，避免条件分支导致的占位符索引错位
-    int index = 1;
-    stmt->bindUint64(index++, talk_id);
-    if (anchor_seq > 0) {
-        stmt->bindUint64(index++, anchor_seq);
-    }
-    if (msg_type != 0) {
-        stmt->bindUint16(index++, msg_type);
-    }
-    if (user_id != 0) {
-        stmt->bindUint64(index++, user_id);
-    }
-    stmt->bindInt32(index++, static_cast<int32_t>(limit));
-
-    auto res = stmt->query();
-    if (!res) {
-        if (err) *err = "query failed";
-        return false;
-    }
-
-    out.clear();
-    while (res->next()) {
-        Message m;
-        m.id = res->getString(0);
-        m.talk_id = res->getUint64(1);
-        m.sequence = res->getUint64(2);
-        m.talk_mode = res->getUint8(3);
-        m.msg_type = res->getUint16(4);
-        m.sender_id = res->getUint64(5);
-        m.receiver_id = res->isNull(6) ? 0 : res->getUint64(6);
-        m.group_id = res->isNull(7) ? 0 : res->getUint64(7);
-        m.content_text = res->isNull(8) ? std::string() : res->getString(8);
-        m.extra = res->isNull(9) ? std::string() : res->getString(9);
-        m.quote_msg_id = res->isNull(10) ? std::string() : res->getString(10);
-        m.is_revoked = res->getUint8(11);
-        m.revoke_by = res->isNull(12) ? 0 : res->getUint64(12);
-        m.revoke_time = res->isNull(13) ? 0 : res->getTime(13);
-        m.created_at = res->getTime(14);
-        m.updated_at = res->getTime(15);
-        out.push_back(std::move(m));
-    }
-    return true;
+    return ListRecentDescWithFilter(db, talk_id, anchor_seq, limit, user_id, msg_type, out, err);
 }
 
 bool MessageDao::ListRecentDescWithFilter(const std::shared_ptr<CIM::MySQL>& db,

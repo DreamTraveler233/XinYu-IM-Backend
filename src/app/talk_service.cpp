@@ -1,9 +1,10 @@
 #include "app/talk_service.hpp"
 
+#include "base/macro.hpp"
+#include "dao/message_read_dao.hpp"
 #include "dao/talk_dao.hpp"
 #include "dao/talk_session_dao.hpp"
 #include "dao/user_dao.hpp"
-#include "base/macro.hpp"
 
 namespace CIM::app {
 
@@ -224,6 +225,17 @@ VoidResult TalkService::clearSessionUnreadNum(const uint64_t user_id, const uint
             result.code = 500;
             result.err = "清除会话未读消息数失败";
             return result;
+        }
+    }
+    // 同时将该会话已读状态写入 im_message_read 表
+    uint64_t talk_id = 0;
+    if (talk_mode == 1) {
+        if (dao::TalkDao::getSingleTalkId(user_id, to_from_id, talk_id, &err)) {
+            (void)dao::MessageReadDao::MarkReadByTalk(talk_id, user_id, &err);
+        }
+    } else if (talk_mode == 2) {
+        if (dao::TalkDao::getGroupTalkId(to_from_id, talk_id, &err)) {
+            (void)dao::MessageReadDao::MarkReadByTalk(talk_id, user_id, &err);
         }
     }
 

@@ -10,6 +10,7 @@ namespace CIM::dao {
 class MessageReadDao {
    public:
     static bool MarkRead(const std::string& msg_id, const uint64_t user_id, std::string* err = nullptr);
+    static bool MarkReadByTalk(const uint64_t talk_id, const uint64_t user_id, std::string* err = nullptr);
 };
 }  // namespace CIM::dao
 

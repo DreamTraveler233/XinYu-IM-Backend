@@ -512,24 +512,6 @@ bool MessageApiModule::onServerReady() {
             root["extra"] = r.extra;
             root["quote"] = r.quote;
             res->setBody(Ok(root));
-
-            // 主动推送给对端（以及发送者其它设备），前端监听事件: im.message
-            // 说明：PushImMessage 将把消息广播到对应频道（单聊/群），并且以同一结构发送
-            // 到所有在线设备。这样前端可以在接收到 `im.message` 时，直接把 payload 插入本地会话视图。
-            // 复用与 REST 返回一致的 body 结构
-            Json::Value body_json;
-            body_json["msg_id"] = r.msg_id;
-            body_json["sequence"] = (Json::UInt64)r.sequence;
-            body_json["msg_type"] = r.msg_type;
-            body_json["from_id"] = (Json::UInt64)r.from_id;
-            body_json["nickname"] = r.nickname;
-            body_json["avatar"] = r.avatar;
-            body_json["is_revoked"] = r.is_revoked;
-            body_json["send_time"] = r.send_time;
-            body_json["extra"] = r.extra;
-            body_json["quote"] = r.quote;
-
-            CIM::api::WsGatewayModule::PushImMessage(talk_mode, to_from_id, r.from_id, body_json);
             return 0;
         });
     }

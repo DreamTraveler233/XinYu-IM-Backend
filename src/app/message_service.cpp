@@ -26,6 +26,20 @@ namespace CIM::app {
 static auto g_logger = CIM_LOG_NAME("root");
 static constexpr const char* kDBName = "default";
 
+// 内部辅助函数：统一获取 talk_id
+static bool GetTalkId(const uint64_t current_user_id, const uint8_t talk_mode,
+                      const uint64_t to_from_id, uint64_t& talk_id, std::string& err) {
+    if (talk_mode == 1) {
+        // 单聊
+        return CIM::dao::TalkDao::getSingleTalkId(current_user_id, to_from_id, talk_id, &err);
+    } else if (talk_mode == 2) {
+        // 群聊
+        return CIM::dao::TalkDao::getGroupTalkId(to_from_id, talk_id, &err);
+    }
+    err = "非法会话类型";
+    return false;
+}
+
 uint64_t MessageService::resolveTalkId(const uint8_t talk_mode, const uint64_t to_from_id) {
     std::string err;
     uint64_t talk_id = 0;
@@ -127,20 +141,15 @@ MessageRecordPageResult MessageService::LoadRecords(const uint64_t current_user_
 
     // 解析 talk_id
     uint64_t talk_id = 0;
-    if (talk_mode == 1) {
-        // 单聊，需要根据两个用户ID排序
-        if (!CIM::dao::TalkDao::getSingleTalkId(current_user_id, to_from_id, talk_id, &err)) {
-            result.ok = true;  // 无历史记录
+    if (!GetTalkId(current_user_id, talk_mode, to_from_id, talk_id, err)) {
+        // 若获取失败（如单聊未建立、群不存在），视为空记录返回，而不是报错
+        // 除非是参数错误
+        if (err == "非法会话类型") {
+            result.code = 400;
+            result.err = err;
             return result;
         }
-    } else if (talk_mode == 2) {
-        if (!CIM::dao::TalkDao::getGroupTalkId(to_from_id, talk_id, &err)) {
-            result.ok = true;  // 群尚未产生消息
-            return result;
-        }
-    } else {
-        result.code = 400;
-        result.err = "非法会话类型";
+        result.ok = true;
         return result;
     }
 
@@ -191,19 +200,13 @@ MessageRecordPageResult MessageService::LoadHistoryRecords(const uint64_t curren
         limit = 200;
 
     uint64_t talk_id = 0;
-    if (talk_mode == 1) {
-        if (!CIM::dao::TalkDao::getSingleTalkId(current_user_id, to_from_id, talk_id, &err)) {
-            result.ok = true;
+    if (!GetTalkId(current_user_id, talk_mode, to_from_id, talk_id, err)) {
+        if (err == "非法会话类型") {
+            result.code = 400;
+            result.err = err;
             return result;
         }
-    } else if (talk_mode == 2) {
-        if (!CIM::dao::TalkDao::getGroupTalkId(to_from_id, talk_id, &err)) {
-            result.ok = true;
-            return result;
-        }
-    } else {
-        result.code = 400;
-        result.err = "非法会话类型";
+        result.ok = true;
         return result;
     }
 
@@ -291,27 +294,14 @@ VoidResult MessageService::DeleteMessages(const uint64_t current_user_id, const 
 
     // 4. 验证会话存在（不严格校验每条消息归属以减少查询；生产可增强）
     uint64_t talk_id = 0;
-    if (talk_mode == 1) {
-        if (!CIM::dao::TalkDao::getSingleTalkId(current_user_id, to_from_id, talk_id, &err)) {
-            if (!err.empty()) {
-                CIM_LOG_WARN(g_logger) << "DeleteMessages getSingleTalkId failed, err=" << err;
-                result.code = 500;
-                result.err = "删除消息失败";
-                return result;
-            }
+    if (!GetTalkId(current_user_id, talk_mode, to_from_id, talk_id, err)) {
+        if (err == "非法会话类型") {
+            result.code = 400;
+            result.err = err;
+            return result;
         }
-    } else if (talk_mode == 2) {
-        if (!CIM::dao::TalkDao::getGroupTalkId(to_from_id, talk_id, &err)) {
-            if (!err.empty()) {
-                CIM_LOG_WARN(g_logger) << "DeleteMessages getGroupTalkId failed, err=" << err;
-                result.code = 500;
-                result.err = "删除消息失败";
-                return result;
-            }
-        }
-    } else {
-        result.code = 400;
-        result.err = "非法会话类型";
+        // 会话不存在，无需删除
+        result.ok = true;
         return result;
     }
 
@@ -445,29 +435,14 @@ VoidResult MessageService::DeleteAllMessagesInTalkForUser(const uint64_t current
 
     // 3. 解析 talk_id
     uint64_t talk_id = 0;
-    if (talk_mode == 1) {
-        if (!CIM::dao::TalkDao::getSingleTalkId(current_user_id, to_from_id, talk_id, &err)) {
-            if (!err.empty()) {
-                CIM_LOG_WARN(g_logger)
-                    << "DeleteAllMessagesInTalkForUser getSingleTalkId failed, err=" << err;
-                result.code = 500;
-                result.err = "删除消息失败";
-                return result;
-            }
+    if (!GetTalkId(current_user_id, talk_mode, to_from_id, talk_id, err)) {
+        if (err == "非法会话类型") {
+            result.code = 400;
+            result.err = err;
+            return result;
         }
-    } else if (talk_mode == 2) {
-        if (!CIM::dao::TalkDao::getGroupTalkId(to_from_id, talk_id, &err)) {
-            if (!err.empty()) {
-                CIM_LOG_WARN(g_logger)
-                    << "DeleteAllMessagesInTalkForUser getGroupTalkId failed, err=" << err;
-                result.code = 500;
-                result.err = "删除消息失败";
-                return result;
-            }
-        }
-    } else {
-        result.code = 400;
-        result.err = "非法会话类型";
+        // 会话不存在，无需删除
+        result.ok = true;
         return result;
     }
 
@@ -684,8 +659,8 @@ VoidResult MessageService::RevokeMessage(const uint64_t current_user_id, const u
             payload["talk_mode"] = talk_mode;
             // For single chat, compute to_from_id per receiver: it's always the other party's id
             if (talk_mode == 1) {
-                payload["to_from_id"] = (Json::UInt64)(uid == current_user_id ? to_from_id
-                                                                                    : current_user_id);
+                payload["to_from_id"] =
+                    (Json::UInt64)(uid == current_user_id ? to_from_id : current_user_id);
             } else {
                 payload["to_from_id"] = (Json::UInt64)to_from_id;
             }
@@ -698,8 +673,8 @@ VoidResult MessageService::RevokeMessage(const uint64_t current_user_id, const u
             Json::Value payload;
             payload["talk_mode"] = talk_mode;
             if (talk_mode == 1) {
-                payload["to_from_id"] = (Json::UInt64)(uid == current_user_id ? to_from_id
-                                                                                    : current_user_id);
+                payload["to_from_id"] =
+                    (Json::UInt64)(uid == current_user_id ? to_from_id : current_user_id);
             } else {
                 payload["to_from_id"] = (Json::UInt64)to_from_id;
             }
@@ -726,7 +701,7 @@ VoidResult MessageService::RevokeMessage(const uint64_t current_user_id, const u
     } catch (const std::exception& ex) {
         CIM_LOG_WARN(g_logger) << "broadcast revoke event failed: " << ex.what();
     }
-    
+
     result.ok = true;
     return result;
 }
@@ -1068,6 +1043,24 @@ MessageRecordResult MessageService::SendMessage(
     // 前端可以直接把这个对象渲染为会话一条消息，不需要额外的网路请求。
     CIM::dao::MessageRecord rec;
     buildRecord(m, rec, &err);
+
+    // 主动推送给对端（以及发送者其它设备），前端监听事件: im.message
+    // 说明：PushImMessage 将把消息广播到对应频道（单聊/群），并且以同一结构发送
+    // 到所有在线设备。这样前端可以在接收到 `im.message` 时，直接把 payload 插入本地会话视图。
+    Json::Value body_json;
+    body_json["msg_id"] = rec.msg_id;
+    body_json["sequence"] = (Json::UInt64)rec.sequence;
+    body_json["msg_type"] = rec.msg_type;
+    body_json["from_id"] = (Json::UInt64)rec.from_id;
+    body_json["nickname"] = rec.nickname;
+    body_json["avatar"] = rec.avatar;
+    body_json["is_revoked"] = rec.is_revoked;
+    body_json["send_time"] = rec.send_time;
+    body_json["extra"] = rec.extra;
+    body_json["quote"] = rec.quote;
+
+    CIM::api::WsGatewayModule::PushImMessage(talk_mode, to_from_id, rec.from_id, body_json);
+
     result.data = std::move(rec);
     result.ok = true;
     return result;
