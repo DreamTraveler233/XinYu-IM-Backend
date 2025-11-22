@@ -1,10 +1,12 @@
 #include "dao/user_dao.hpp"
 
 #include "db/mysql.hpp"
+#include "base/macro.hpp"
 
 namespace IM::dao {
 
 static constexpr const char* kDBName = "default";
+static auto g_logger = IM_LOG_ROOT();
 
 bool UserDAO::Create(const std::shared_ptr<IM::MySQL>& db, const User& u, uint64_t& out_id,
                      std::string* err) {
@@ -13,9 +15,9 @@ bool UserDAO::Create(const std::shared_ptr<IM::MySQL>& db, const User& u, uint64
         return false;
     }
     const char* sql =
-        "INSERT INTO im_user (mobile, email, nickname, avatar, motto, birthday, gender, "
+        "INSERT INTO im_user (mobile, email, nickname, avatar, avatar_media_id, motto, birthday, gender, "
         "online_status, last_online_at, is_qiye, is_robot, is_disabled, created_at, updated_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
     auto stmt = db->prepare(sql);
     if (!stmt) {
         if (err) *err = "prepare sql failed";
@@ -31,23 +33,27 @@ bool UserDAO::Create(const std::shared_ptr<IM::MySQL>& db, const User& u, uint64
         stmt->bindString(4, u.avatar);
     else
         stmt->bindNull(4);
-    if (!u.motto.empty())
-        stmt->bindString(5, u.motto);
+    if (!u.avatar_media_id.empty())
+        stmt->bindString(5, u.avatar_media_id);
     else
         stmt->bindNull(5);
-    if (!u.birthday.empty())
-        stmt->bindString(6, u.birthday);
+    if (!u.motto.empty())
+        stmt->bindString(6, u.motto);
     else
         stmt->bindNull(6);
-    stmt->bindUint8(7, u.gender);
-    stmt->bindString(8, u.online_status);
-    if (u.last_online_at != 0)
-        stmt->bindTime(9, u.last_online_at);
+    if (!u.birthday.empty())
+        stmt->bindString(7, u.birthday);
     else
-        stmt->bindNull(9);
-    stmt->bindUint8(10, u.is_qiye);
-    stmt->bindUint8(11, u.is_robot);
-    stmt->bindUint8(12, u.is_disabled);
+        stmt->bindNull(7);
+    stmt->bindUint8(8, u.gender);
+    stmt->bindString(9, u.online_status);
+    if (u.last_online_at != 0)
+        stmt->bindTime(10, u.last_online_at);
+    else
+        stmt->bindNull(10);
+    stmt->bindUint8(11, u.is_qiye);
+    stmt->bindUint8(12, u.is_robot);
+    stmt->bindUint8(13, u.is_disabled);
 
     if (stmt->execute() != 0) {
         if (err) *err = stmt->getErrStr();
@@ -64,7 +70,7 @@ bool UserDAO::GetByMobile(const std::string& mobile, User& out, std::string* err
         return false;
     }
     const char* sql =
-        "SELECT id, mobile, email, nickname, avatar, motto, DATE_FORMAT(birthday, '%Y-%m-%d') as "
+        "SELECT id, mobile, email, nickname, avatar, avatar_media_id, motto, DATE_FORMAT(birthday, '%Y-%m-%d') as "
         "birthday, gender, online_status, last_online_at, is_qiye, is_robot, is_disabled, "
         "created_at, updated_at FROM im_user WHERE mobile = ? LIMIT 1";
     auto stmt = db->prepare(sql);
@@ -89,16 +95,17 @@ bool UserDAO::GetByMobile(const std::string& mobile, User& out, std::string* err
     out.email = res->isNull(2) ? std::string() : res->getString(2);
     out.nickname = res->isNull(3) ? std::string() : res->getString(3);
     out.avatar = res->isNull(4) ? std::string() : res->getString(4);
-    out.motto = res->isNull(5) ? std::string() : res->getString(5);
-    out.birthday = res->isNull(6) ? std::string() : res->getString(6);
-    out.gender = res->getUint8(7);
-    out.online_status = res->isNull(8) ? "N" : res->getString(8);
-    out.last_online_at = res->isNull(9) ? 0 : res->getTime(9);
-    out.is_qiye = res->isNull(10) ? 0 : res->getUint8(10);
-    out.is_robot = res->isNull(11) ? 0 : res->getUint8(11);
-    out.is_disabled = res->isNull(12) ? 0 : res->getUint8(12);
-    out.created_at = res->getTime(13);
-    out.updated_at = res->getTime(14);
+    out.avatar_media_id = res->isNull(5) ? std::string() : res->getString(5);
+    out.motto = res->isNull(6) ? std::string() : res->getString(6);
+    out.birthday = res->isNull(7) ? std::string() : res->getString(7);
+    out.gender = res->getUint8(8);
+    out.online_status = res->isNull(9) ? "N" : res->getString(9);
+    out.last_online_at = res->isNull(10) ? 0 : res->getTime(10);
+    out.is_qiye = res->isNull(11) ? 0 : res->getUint8(11);
+    out.is_robot = res->isNull(12) ? 0 : res->getUint8(12);
+    out.is_disabled = res->isNull(13) ? 0 : res->getUint8(13);
+    out.created_at = res->getTime(14);
+    out.updated_at = res->getTime(15);
 
     return true;
 }
@@ -110,7 +117,7 @@ bool UserDAO::GetByEmail(const std::string& email, User& out, std::string* err) 
         return false;
     }
     const char* sql =
-        "SELECT id, mobile, email, nickname, avatar, motto, DATE_FORMAT(birthday, '%Y-%m-%d') as "
+        "SELECT id, mobile, email, nickname, avatar, avatar_media_id, motto, DATE_FORMAT(birthday, '%Y-%m-%d') as "
         "birthday, gender, online_status, last_online_at, is_qiye, is_robot, is_disabled, "
         "created_at, updated_at FROM im_user WHERE email = ? LIMIT 1";
     auto stmt = db->prepare(sql);
@@ -135,16 +142,17 @@ bool UserDAO::GetByEmail(const std::string& email, User& out, std::string* err) 
     out.email = res->isNull(2) ? std::string() : res->getString(2);
     out.nickname = res->isNull(3) ? std::string() : res->getString(3);
     out.avatar = res->isNull(4) ? std::string() : res->getString(4);
-    out.motto = res->isNull(5) ? std::string() : res->getString(5);
-    out.birthday = res->isNull(6) ? std::string() : res->getString(6);
-    out.gender = res->getUint8(7);
-    out.online_status = res->isNull(8) ? "N" : res->getString(8);
-    out.last_online_at = res->isNull(9) ? 0 : res->getTime(9);
-    out.is_qiye = res->isNull(10) ? 0 : res->getUint8(10);
-    out.is_robot = res->isNull(11) ? 0 : res->getUint8(11);
-    out.is_disabled = res->isNull(12) ? 0 : res->getUint8(12);
-    out.created_at = res->getTime(13);
-    out.updated_at = res->getTime(14);
+    out.avatar_media_id = res->isNull(5) ? std::string() : res->getString(5);
+    out.motto = res->isNull(6) ? std::string() : res->getString(6);
+    out.birthday = res->isNull(7) ? std::string() : res->getString(7);
+    out.gender = res->getUint8(8);
+    out.online_status = res->isNull(9) ? "N" : res->getString(9);
+    out.last_online_at = res->isNull(10) ? 0 : res->getTime(10);
+    out.is_qiye = res->isNull(11) ? 0 : res->getUint8(11);
+    out.is_robot = res->isNull(12) ? 0 : res->getUint8(12);
+    out.is_disabled = res->isNull(13) ? 0 : res->getUint8(13);
+    out.created_at = res->getTime(14);
+    out.updated_at = res->getTime(15);
 
     return true;
 }
@@ -156,7 +164,7 @@ bool UserDAO::GetById(uint64_t id, User& out, std::string* err) {
         return false;
     }
     const char* sql =
-        "SELECT id, mobile, email, nickname, avatar, motto, DATE_FORMAT(birthday, "
+        "SELECT id, mobile, email, nickname, avatar, avatar_media_id, motto, DATE_FORMAT(birthday, "
         "'%Y-%m-%d') as birthday, gender, online_status, last_online_at, is_robot, is_qiye, "
         "is_disabled, created_at, updated_at FROM im_user WHERE id = ? LIMIT 1";
     auto stmt = db->prepare(sql);
@@ -181,16 +189,17 @@ bool UserDAO::GetById(uint64_t id, User& out, std::string* err) {
     out.email = res->isNull(2) ? std::string() : res->getString(2);
     out.nickname = res->isNull(3) ? std::string() : res->getString(3);
     out.avatar = res->isNull(4) ? std::string() : res->getString(4);
-    out.motto = res->isNull(5) ? std::string() : res->getString(5);
-    out.birthday = res->isNull(6) ? std::string() : res->getString(6);
-    out.gender = res->getUint8(7);
-    out.online_status = res->isNull(8) ? std::string("N") : res->getString(8);
-    out.last_online_at = res->isNull(9) ? 0 : res->getTime(9);
-    out.is_robot = res->isNull(10) ? 0 : res->getUint8(10);
-    out.is_qiye = res->isNull(11) ? 0 : res->getUint8(11);
-    out.is_disabled = res->isNull(12) ? 0 : res->getUint8(12);
-    out.created_at = res->getTime(13);
-    out.updated_at = res->getTime(14);
+    out.avatar_media_id = res->isNull(5) ? std::string() : res->getString(5);
+    out.motto = res->isNull(6) ? std::string() : res->getString(6);
+    out.birthday = res->isNull(7) ? std::string() : res->getString(7);
+    out.gender = res->getUint8(8);
+    out.online_status = res->isNull(9) ? std::string("N") : res->getString(9);
+    out.last_online_at = res->isNull(10) ? 0 : res->getTime(10);
+    out.is_robot = res->isNull(11) ? 0 : res->getUint8(11);
+    out.is_qiye = res->isNull(12) ? 0 : res->getUint8(12);
+    out.is_disabled = res->isNull(13) ? 0 : res->getUint8(13);
+    out.created_at = res->getTime(14);
+    out.updated_at = res->getTime(15);
 
     return true;
 }
@@ -202,7 +211,7 @@ bool UserDAO::GetById(const std::shared_ptr<IM::MySQL>& db, const uint64_t id, U
         return false;
     }
     const char* sql =
-        "SELECT id, mobile, email, nickname, avatar, motto, DATE_FORMAT(birthday, "
+        "SELECT id, mobile, email, nickname, avatar, avatar_media_id, motto, DATE_FORMAT(birthday, "
         "'%Y-%m-%d') as birthday, gender, online_status, last_online_at, is_robot, is_qiye, "
         "is_disabled, created_at, updated_at FROM im_user WHERE id = ? LIMIT 1";
     auto stmt = db->prepare(sql);
@@ -227,16 +236,17 @@ bool UserDAO::GetById(const std::shared_ptr<IM::MySQL>& db, const uint64_t id, U
     out.email = res->isNull(2) ? std::string() : res->getString(2);
     out.nickname = res->isNull(3) ? std::string() : res->getString(3);
     out.avatar = res->isNull(4) ? std::string() : res->getString(4);
-    out.motto = res->isNull(5) ? std::string() : res->getString(5);
-    out.birthday = res->isNull(6) ? std::string() : res->getString(6);
-    out.gender = res->getUint8(7);
-    out.online_status = res->isNull(8) ? std::string("N") : res->getString(8);
-    out.last_online_at = res->isNull(9) ? 0 : res->getTime(9);
-    out.is_robot = res->isNull(10) ? 0 : res->getUint8(10);
-    out.is_qiye = res->isNull(11) ? 0 : res->getUint8(11);
-    out.is_disabled = res->isNull(12) ? 0 : res->getUint8(12);
-    out.created_at = res->getTime(13);
-    out.updated_at = res->getTime(14);
+    out.avatar_media_id = res->isNull(5) ? std::string() : res->getString(5);
+    out.motto = res->isNull(6) ? std::string() : res->getString(6);
+    out.birthday = res->isNull(7) ? std::string() : res->getString(7);
+    out.gender = res->getUint8(8);
+    out.online_status = res->isNull(9) ? std::string("N") : res->getString(9);
+    out.last_online_at = res->isNull(10) ? 0 : res->getTime(10);
+    out.is_robot = res->isNull(11) ? 0 : res->getUint8(11);
+    out.is_qiye = res->isNull(12) ? 0 : res->getUint8(12);
+    out.is_disabled = res->isNull(13) ? 0 : res->getUint8(13);
+    out.created_at = res->getTime(14);
+    out.updated_at = res->getTime(15);
 
     return true;
 }
@@ -248,20 +258,50 @@ bool UserDAO::UpdateUserInfo(uint64_t id, const std::string& nickname, const std
         if (err) *err = "get mysql connection failed";
         return false;
     }
+
+    bool is_id = false;
+    if (avatar.length() == 32) {
+        is_id = true;
+        for (char c : avatar) {
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+                is_id = false;
+                break;
+            }
+        }
+    }
+
     const char* sql =
-        "UPDATE im_user SET nickname = ?, avatar = ?, motto = ?, gender = ?, birthday = ?, "
+        "UPDATE im_user SET nickname = COALESCE(NULLIF(?, ''), nickname), avatar = ?, avatar_media_id = ?, motto = NULLIF(?, ''), gender = ?, "
+        "birthday = ?, "
         "updated_at = NOW() WHERE id = ?";
     auto stmt = db->prepare(sql);
     if (!stmt) {
         if (err) *err = "prepare sql failed";
         return false;
     }
+    // 始终绑定 nickname，但 SQL 会在为空时回退到现有值
     stmt->bindString(1, nickname);
-    stmt->bindString(2, avatar);
-    stmt->bindString(3, motto);
-    stmt->bindUint8(4, gender);
-    stmt->bindString(5, birthday);
-    stmt->bindUint64(6, id);
+    if (!avatar.empty())
+        stmt->bindString(2, avatar);
+    else
+        stmt->bindNull(2);
+    if (is_id)
+        stmt->bindString(3, avatar);
+    else
+        stmt->bindNull(3);
+    // 将 motto 绑定为字符串，SQL 的 NULLIF 会在空字符串时将其置为 NULL
+    stmt->bindString(4, motto);
+    stmt->bindUint8(5, gender);
+    if (!birthday.empty())
+        stmt->bindString(6, birthday);
+    else
+        stmt->bindNull(6);
+    stmt->bindUint64(7, id);
+    IM_LOG_DEBUG(g_logger) << "UserDAO::UpdateUserInfo bind values: id=" << id
+                           << " nickname='" << nickname << "' avatar='" << avatar
+                           << "' avatar_is_id=" << (is_id ? "1" : "0")
+                           << " motto='" << motto << "' gender=" << (int)gender
+                           << " birthday='" << birthday << "'";
     if (stmt->execute() != 0) {
         if (err) *err = stmt->getErrStr();
         return false;

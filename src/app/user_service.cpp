@@ -1,7 +1,9 @@
 #include "app/user_service.hpp"
 
+#include "app/media_service.hpp"
 #include "base/macro.hpp"
 #include "common/common.hpp"
+#include "dao/media_dao.hpp"
 #include "dao/user_auth_dao.hpp"
 #include "dao/user_dao.hpp"
 #include "other/crypto_module.hpp"
@@ -21,6 +23,22 @@ UserResult UserService::LoadUserInfo(const uint64_t uid) {
             result.code = 500;
             result.err = "加载用户信息失败";
             return result;
+        }
+    }
+
+    if (!result.data.avatar.empty() && result.data.avatar.length() == 32) {
+        bool is_id = true;
+        for (char c : result.data.avatar) {
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+                is_id = false;
+                break;
+            }
+        }
+        if (is_id) {
+            IM::dao::MediaFile media;
+            if (IM::app::MediaService::GetMediaFile(result.data.avatar, media)) {
+                result.data.avatar = media.url;
+            }
         }
     }
 
@@ -394,6 +412,22 @@ UserInfoResult UserService::LoadUserInfoSimple(const uint64_t uid) {
             result.code = 404;
             result.err = "加载用户信息失败";
             return result;
+        }
+    }
+
+    if (!result.data.avatar.empty() && result.data.avatar.length() == 32) {
+        bool is_id = true;
+        for (char c : result.data.avatar) {
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+                is_id = false;
+                break;
+            }
+        }
+        if (is_id) {
+            IM::dao::MediaFile media;
+            if (IM::app::MediaService::GetMediaFile(result.data.avatar, media)) {
+                result.data.avatar = media.url;
+            }
         }
     }
 

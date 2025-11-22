@@ -66,6 +66,22 @@ CONF=/path/to/your.conf ./nginx-dev.sh start
 - 日志、PID 文件等默认生成在脚本同级目录。
 - 如遇启动失败，请检查 error log。
 
+## 媒体文件静态目录（/media/）
+
+如果你希望将后端上传（`data/uploads`）的文件暴露为 HTTP 静态资源（例如 /media/2025/11/21/xxx.png），你可以在 `nginx.dev.conf` 或独立配置文件中加入如下段落：
+
+```nginx
+  location /media/ {
+    alias /absolute/path/to/IM-backend/data/uploads/; # 注意 alias 必须以 / 结尾
+    expires 30d;
+    access_log off;
+    add_header Cache-Control "public";
+    try_files $uri $uri/ =404;
+  }
+```
+
+也可以使用 `scripts/docker/nginx.media.conf` 中提供的演示配置文件，默认将 `data/uploads` 目录映射到 `/media`。确保 Nginx 的 `alias` 指向正确的绝对路径，并保证 Nginx 运行用户有权限访问该目录。
+
 ---
 
 如有问题请联系维护者。

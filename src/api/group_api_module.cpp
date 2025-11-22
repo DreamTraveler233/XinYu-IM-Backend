@@ -25,7 +25,7 @@ bool GroupApiModule::onServerReady() {
         if (!http) continue;
         auto dispatch = http->getServletDispatch();
 
-        // group-apply
+        // 群组申请
         dispatch->addServlet(
             "/api/v1/group-apply/agree",
             [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
@@ -89,7 +89,7 @@ bool GroupApiModule::onServerReady() {
                 return 0;
             });
 
-        // group-notice
+        // 群组公告
         dispatch->addServlet(
             "/api/v1/group-notice/edit",
             [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
@@ -99,7 +99,7 @@ bool GroupApiModule::onServerReady() {
                 return 0;
             });
 
-        // group-vote
+        // 群组投票
         dispatch->addServlet(
             "/api/v1/group-vote/create",
             [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
@@ -126,7 +126,7 @@ bool GroupApiModule::onServerReady() {
                 return 0;
             });
 
-        // group main
+        // 群组主要接口
         dispatch->addServlet(
             "/api/v1/group/assign-admin",
             [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,

@@ -148,7 +148,7 @@ bool ContactGroupDAO::UpdateContactCountWithConn(const std::shared_ptr<IM::MySQL
     }
     const char* sql;
     if (!increase) {
-        // avoid unsigned underflow
+        // 避免无符号整数下溢
         sql =
             "UPDATE im_contact_group SET contact_count = GREATEST(contact_count - 1, 0) WHERE id = "
             "?";

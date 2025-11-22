@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `im_user` (
   `email` VARCHAR(100) NULL COMMENT '邮箱（唯一，可选，用于找回/通知）',
   `nickname` VARCHAR(64) NOT NULL COMMENT '昵称',
   `avatar` VARCHAR(255) NULL COMMENT '头像URL',
+  `avatar_media_id` CHAR(32) NULL COMMENT '头像文件ID',
   `gender` TINYINT NOT NULL DEFAULT 0 COMMENT '性别：0=未知 1=男 2=女',
   `motto` VARCHAR(255) NULL COMMENT '个性签名',
   `birthday` DATE NULL COMMENT '生日 YYYY-MM-DD',

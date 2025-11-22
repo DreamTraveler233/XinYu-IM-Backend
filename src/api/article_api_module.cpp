@@ -24,7 +24,7 @@ bool ArticleApiModule::onServerReady() {
         if (!http) continue;
         auto dispatch = http->getServletDispatch();
 
-        // article-annex
+        // 文章附件
         dispatch->addServlet("/api/v1/article-annex/delete",
                              [](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
                                 IM::http::HttpSession::ptr) {
@@ -56,7 +56,7 @@ bool ArticleApiModule::onServerReady() {
                                  return 0;
                              });
 
-        // article classify
+        // 文章分类
         dispatch->addServlet("/api/v1/article/classify/delete",
                              [](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
                                 IM::http::HttpSession::ptr) {
@@ -88,7 +88,7 @@ bool ArticleApiModule::onServerReady() {
                                  return 0;
                              });
 
-        // article core
+        // 文章核心接口
         dispatch->addServlet("/api/v1/article/delete",
                              [](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
                                 IM::http::HttpSession::ptr) {

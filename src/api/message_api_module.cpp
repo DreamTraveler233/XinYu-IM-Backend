@@ -302,7 +302,7 @@ bool MessageApiModule::onServerReady() {
                                 try {
                                     mentioned_user_ids.push_back(std::stoull(v.asString()));
                                 } catch (...) {
-                                    // ignore malformed id
+                                    // 忽略格式不正确的 id
                                 }
                             }
                         }
@@ -412,7 +412,7 @@ bool MessageApiModule::onServerReady() {
                     }
                 };
 
-                // if action==1 (single), send each msg_id separately
+                // 如果 action==1（单条），分别发送每个 msg_id
                 if (action == 1) {
                     // 对 user_ids
                     if (payload.isMember("user_ids") && payload["user_ids"].isArray()) {
@@ -449,7 +449,7 @@ bool MessageApiModule::onServerReady() {
                         }
                     }
                 } else {
-                    // action==2: 合并转发 -> send a single message with msg_ids[] for each target
+                    // action==2：合并转发 -> 为每个目标发送一条包含 msg_ids[] 的消息
                     Json::Value fp(Json::objectValue);
                     Json::Value arr(Json::arrayValue);
                     for (auto& mid : forward_msg_ids) arr.append(mid);

@@ -16,6 +16,7 @@ struct User {
     std::string email = "";           // 邮箱（唯一，可选，用于找回/通知）
     std::string nickname = "";        // 昵称
     std::string avatar = "";          // 头像URL，可选
+    std::string avatar_media_id = ""; // 头像文件ID
     std::string motto = "";           // 个性签名，可选
     std::string birthday = "";        // 生日 YYYY-MM-DD，可选
     uint8_t gender = 0;               // 性别：0=未知 1=男 2=女

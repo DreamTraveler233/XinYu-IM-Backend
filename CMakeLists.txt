@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.10)
 project(IM)
 
 # ==================== 依赖查找 ====================
+# 查找 ccache 以加快编译速度
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    message(STATUS "Found ccache: ${CCACHE_PROGRAM}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif()
+
 # 必需的系统依赖
 find_package(Threads REQUIRED)
 
@@ -22,6 +30,7 @@ pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 pkg_check_modules(LIBEVENT REQUIRED libevent)
 pkg_check_modules(HIREDIS_VIP REQUIRED hiredis_vip)
 pkg_check_modules(TINYXML2 REQUIRED tinyxml2)
+pkg_check_modules(MULTIPART_PARSER REQUIRED multipartparser)
 
 # 查找 Ragel 状态机编译器
 find_program(RAGEL_EXECUTABLE ragel)
@@ -110,6 +119,7 @@ target_include_directories(IM
         ${LIBEVENT_INCLUDE_DIRS}
         ${HIREDIS_INCLUDE_DIRS}
         ${TINYXML2_INCLUDE_DIRS}
+        ${MULTIPART_PARSER_INCLUDE_DIRS}
 )
 
 # ==================== 依赖链接 ====================
@@ -130,6 +140,7 @@ target_link_libraries(IM
         ${LIBEVENT_LIBRARIES}
         ${HIREDIS_VIP_LIBRARIES}
         ${TINYXML2_LIBRARIES}
+        ${MULTIPART_PARSER_LIBRARIES}
         /usr/lib/x86_64-linux-gnu/libzookeeper_mt.so
 )
 

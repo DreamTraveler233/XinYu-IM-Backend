@@ -182,7 +182,7 @@ TalkSessionResult ContactService::AgreeApply(const uint64_t user_id, const uint6
         payload_accept["acceptor_name"] = acceptor.nickname;
         payload_accept["acceptor_avatar"] = acceptor.avatar;
         payload_accept["accept_time"] = (Json::UInt64)IM::TimeUtil::NowToMS();
-        // also attach session info for applicant if present
+        // 如果有申请人会话信息，也一并附加
         if (session_result_applicant.ok) {
             payload_accept["session"] = s2;
         }

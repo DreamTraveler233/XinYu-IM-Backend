@@ -151,7 +151,7 @@ SmsCodeResult CommonService::SendEmailCode(const std::string& email, const std::
         return result;
     }
 
-    result.data.code = code;  // For testing/mocking purposes, or remove if strict security
+    result.data.code = code;  // 用于测试/模拟，或在严格安全策略下移除
     result.ok = true;
     return result;
 }
@@ -182,13 +182,13 @@ bool CommonService::SendRealEmail(const std::string& email_addr, const std::stri
     auto smtp_pass = g_smtp_auth_pass->getValue();
     auto smtp_from_addr = g_smtp_from_address->getValue();
     auto smtp_from_name = g_smtp_from_name->getValue();
-    // If new keys not set, try parsing old smtp_from into name and address
+    // 如果新键未设置，尝试从旧的 smtp_from 中解析出姓名和地址
     if (smtp_from_addr.empty()) {
-        // fallback to auth user
+        // 回退到认证用户
         smtp_from_addr = smtp_user;
     }
     if (smtp_from_name.empty()) {
-        // leave empty if not provided
+        // 如果未提供则留空
     }
     std::string display_from;
     if (!smtp_from_name.empty()) {
@@ -204,10 +204,10 @@ bool CommonService::SendRealEmail(const std::string& email_addr, const std::stri
         return false;
     }
 
-    // No fallback to old config. Use auth user/address explicitly set in new config.
+    // 不回退到旧配置。请在新配置中显式设置认证用户/地址。
 
     IM::EMail::ptr mail = IM::EMail::Create(display_from, smtp_pass, title, body, {email_addr});
-    // Set explicit auth user if provided (used by SmtpClient for AUTH); fallback to empty
+    // 如果提供则显式设置认证用户（供 SmtpClient 用于 AUTH）；未提供则回退为空
     if (!smtp_user.empty()) {
         mail->setAuthUser(smtp_user);
     }

@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS `im_group` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '群ID（由数据库自增）',
   `group_name` VARCHAR(64) NOT NULL COMMENT '群名称',
   `avatar` VARCHAR(255) NULL COMMENT '群头像URL',
+  `avatar_media_id` CHAR(32) NULL COMMENT '群头像媒体ID',
   `profile` VARCHAR(255) NULL COMMENT '群简介/公告摘要（非正式公告）',
   `leader_id` BIGINT UNSIGNED NOT NULL COMMENT '群主用户ID（owner）',
   `creator_id` BIGINT UNSIGNED NOT NULL COMMENT '创建者用户ID（通常=leader_id）',
