@@ -1,7 +1,7 @@
 #include "db/sqlite3.hpp"
 
-#include "config/config.hpp"
 #include "base/macro.hpp"
+#include "config/config.hpp"
 #include "system/env.hpp"
 #include "util/time_util.hpp"
 
@@ -546,7 +546,7 @@ SQLite3::ptr SQLite3Manager::get(const std::string& name) {
     if (!sql.empty()) {
         if (rt->execute(sql)) {
             IM_LOG_ERROR(g_logger) << "execute sql=" << sql << " errno=" << rt->getErrno()
-                                    << " errstr=" << rt->getErrStr();
+                                   << " errstr=" << rt->getErrStr();
             delete rt;
             return nullptr;
         }
@@ -595,7 +595,7 @@ int SQLite3Manager::execute(const std::string& name, const char* format, va_list
     auto conn = get(name);
     if (!conn) {
         IM_LOG_ERROR(g_logger) << "SQLite3Manager::execute, get(" << name
-                                << ") fail, format=" << format;
+                               << ") fail, format=" << format;
         return -1;
     }
     return conn->execute(format, ap);
@@ -622,7 +622,7 @@ ISQLData::ptr SQLite3Manager::query(const std::string& name, const char* format,
     auto conn = get(name);
     if (!conn) {
         IM_LOG_ERROR(g_logger) << "SQLite3Manager::query, get(" << name
-                                << ") fail, format=" << format;
+                               << ") fail, format=" << format;
         return nullptr;
     }
     return conn->query(format, ap);

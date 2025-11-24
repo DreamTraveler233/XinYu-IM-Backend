@@ -5,7 +5,6 @@
 #include <atomic>
 #include <unordered_map>
 
-#include "app/user_service.hpp"
 #include "base/macro.hpp"
 #include "common/common.hpp"
 #include "http/ws_server.hpp"
@@ -18,7 +17,8 @@ namespace IM::api {
 
 static auto g_logger = IM_LOG_NAME("root");
 
-WsGatewayModule::WsGatewayModule() : Module("ws.gateway", "0.1.0", "builtin") {}
+WsGatewayModule::WsGatewayModule(IM::domain::service::IUserService::Ptr user_service)
+    : Module("ws.gateway", "0.1.0", "builtin"), m_user_service(std::move(user_service)) {}
 
 // 简易查询串解析（假设无需URL解码，前端传递 token 直接可用）
 static std::unordered_map<std::string, std::string> ParseQueryKV(const std::string& q) {
@@ -161,8 +161,8 @@ bool WsGatewayModule::onServerReady() {
         };
 
         // 2.2 连接关闭回调：移除会话表
-        auto on_close = [](IM::http::HttpRequest::ptr /*header*/,
-                           IM::http::WSSession::ptr session) -> int32_t {
+        auto on_close = [this](IM::http::HttpRequest::ptr /*header*/,
+                               IM::http::WSSession::ptr session) -> int32_t {
             // 获取连接上下文
             ConnCtx ctx;
             {
@@ -175,7 +175,7 @@ bool WsGatewayModule::onServerReady() {
 
             // 执行下线操作：更新用户在线状态为离线
             if (ctx.uid != 0) {
-                auto offline_result = IM::app::UserService::Offline(ctx.uid);
+                auto offline_result = m_user_service->Offline(ctx.uid);
                 if (!offline_result.ok) {
                     IM_LOG_ERROR(g_logger)
                         << "Offline failed for uid=" << ctx.uid << ", err=" << offline_result.err;

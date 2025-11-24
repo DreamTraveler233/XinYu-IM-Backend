@@ -27,7 +27,7 @@ bool EmoticonApiModule::onServerReady() {
 
         dispatch->addServlet(
             "/api/v1/emoticon/customize/create",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -35,7 +35,7 @@ bool EmoticonApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/emoticon/customize/delete",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -43,7 +43,7 @@ bool EmoticonApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/emoticon/customize/list",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d;

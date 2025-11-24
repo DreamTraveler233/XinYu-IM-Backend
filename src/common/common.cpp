@@ -37,8 +37,8 @@ bool ParseBody(const std::string& body, Json::Value& out) {
     return out.isObject();
 }
 
-TokenResult SignJwt(const std::string& uid, uint32_t expires_in) {
-    TokenResult result;
+Result<std::string> SignJwt(const std::string& uid, uint32_t expires_in) {
+    Result<std::string> result;
     auto now = std::chrono::system_clock::now();
     auto exp = now + std::chrono::seconds(expires_in);
     try {
@@ -105,8 +105,8 @@ bool IsJwtExpired(const std::string& token) {
     return false;
 }
 
-UidResult GetUidFromToken(IM::http::HttpRequest::ptr req, IM::http::HttpResponse::ptr res) {
-    UidResult result;
+Result<uint64_t> GetUidFromToken(IM::http::HttpRequest::ptr req, IM::http::HttpResponse::ptr res) {
+    Result<uint64_t> result;
 
     // 从请求头中提取 Token
     std::string header = req->getHeader("Authorization", "");
@@ -145,8 +145,8 @@ UidResult GetUidFromToken(IM::http::HttpRequest::ptr req, IM::http::HttpResponse
     return result;
 }
 
-PasswordResult DecryptPassword(const std::string& encrypted_password, std::string& out_plaintext) {
-    PasswordResult result;
+Result<void> DecryptPassword(const std::string& encrypted_password, std::string& out_plaintext) {
+    Result<void> result;
 
     // Base64 解码
     std::string cipher_bin = IM::base64decode(encrypted_password);

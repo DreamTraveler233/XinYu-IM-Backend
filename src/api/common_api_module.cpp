@@ -1,11 +1,7 @@
 #include "api/common_api_module.hpp"
 
-#include "app/common_service.hpp"
-#include "app/user_service.hpp"
 #include "base/macro.hpp"
 #include "common/common.hpp"
-#include "dao/user_dao.hpp"
-#include "db/mysql.hpp"
 #include "http/http_server.hpp"
 #include "http/http_servlet.hpp"
 #include "system/application.hpp"
@@ -15,7 +11,11 @@ namespace IM::api {
 
 static auto g_logger = IM_LOG_NAME("root");
 
-CommonApiModule::CommonApiModule() : Module("api.common", "0.1.0", "builtin") {}
+CommonApiModule::CommonApiModule(IM::domain::service::ICommonService::Ptr common_service,
+                                 IM::domain::service::IUserService::Ptr user_service)
+    : Module("api.common", "0.1.0", "builtin"),
+      m_common_service(std::move(common_service)),
+      m_user_service(std::move(user_service)) {}
 
 bool CommonApiModule::onServerReady() {
     std::vector<IM::TcpServer::ptr> httpServers;
@@ -25,7 +25,7 @@ bool CommonApiModule::onServerReady() {
     }
 
     // 初始化验证码清理定时器（幂等）
-    IM::app::CommonService::InitCleanupTimer();
+    m_common_service->InitCleanupTimer();
 
     for (auto& s : httpServers) {
         auto http = std::dynamic_pointer_cast<IM::http::HttpServer>(s);
@@ -33,9 +33,9 @@ bool CommonApiModule::onServerReady() {
         auto dispatch = http->getServletDispatch();
 
         // 发送短信验证码
-        dispatch->addServlet("/api/v1/common/send-sms", [](IM::http::HttpRequest::ptr req,
-                                                           IM::http::HttpResponse::ptr res,
-                                                           IM::http::HttpSession::ptr session) {
+        dispatch->addServlet("/api/v1/common/send-sms", [this](IM::http::HttpRequest::ptr req,
+                                                               IM::http::HttpResponse::ptr res,
+                                                               IM::http::HttpSession::ptr session) {
             res->setHeader("Content-Type", "application/json");
 
             std::string mobile, channel;
@@ -46,7 +46,7 @@ bool CommonApiModule::onServerReady() {
             }
 
             /*判断手机号是否已经注册*/
-            auto ret = IM::app::UserService::GetUserByMobile(mobile, channel);
+            auto ret = m_user_service->GetUserByMobile(mobile, channel);
             if (!ret.ok) {
                 res->setStatus(ToHttpStatus(ret.code));
                 res->setBody(Error(ret.code, ret.err));
@@ -54,7 +54,7 @@ bool CommonApiModule::onServerReady() {
             }
 
             /* 发送短信验证码 */
-            auto result = IM::app::CommonService::SendSmsCode(mobile, channel, session);
+            auto result = m_common_service->SendSmsCode(mobile, channel, session);
             if (!result.ok) {
                 res->setStatus(ToHttpStatus(result.code));
                 res->setBody(Error(result.code, result.err));
@@ -68,44 +68,45 @@ bool CommonApiModule::onServerReady() {
         });
 
         // 注册邮箱服务
-        dispatch->addServlet("/api/v1/common/send-email", [](IM::http::HttpRequest::ptr req,
-                                                             IM::http::HttpResponse::ptr res,
-                                                             IM::http::HttpSession::ptr session) {
-            res->setHeader("Content-Type", "application/json");
+        dispatch->addServlet("/api/v1/common/send-email",
+                             [this](IM::http::HttpRequest::ptr req, IM::http::HttpResponse::ptr res,
+                                    IM::http::HttpSession::ptr session) {
+                                 res->setHeader("Content-Type", "application/json");
 
-            std::string email, channel;
-            Json::Value body;
-            if (ParseBody(req->getBody(), body)) {
-                email = IM::JsonUtil::GetString(body, "email");
-                channel = IM::JsonUtil::GetString(body, "channel");
-            }
+                                 std::string email, channel;
+                                 Json::Value body;
+                                 if (ParseBody(req->getBody(), body)) {
+                                     email = IM::JsonUtil::GetString(body, "email");
+                                     channel = IM::JsonUtil::GetString(body, "channel");
+                                 }
 
-            /*判断邮箱是否已经注册*/
-            auto ret = IM::app::UserService::GetUserByEmail(email, channel);
-            if (!ret.ok) {
-                res->setStatus(ToHttpStatus(ret.code));
-                res->setBody(Error(ret.code, ret.err));
-                return 0;
-            }
+                                 /*判断邮箱是否已经注册*/
+                                 auto ret = m_user_service->GetUserByEmail(email, channel);
+                                 if (!ret.ok) {
+                                     res->setStatus(ToHttpStatus(ret.code));
+                                     res->setBody(Error(ret.code, ret.err));
+                                     return 0;
+                                 }
 
-            auto result = IM::app::CommonService::SendEmailCode(email, channel, session);
-            if (!result.ok) {
-                res->setStatus(ToHttpStatus(result.code));
-                res->setBody(Error(result.code, result.err));
-                return 0;
-            }
+                                 auto result =
+                                     m_common_service->SendEmailCode(email, channel, session);
+                                 if (!result.ok) {
+                                     res->setStatus(ToHttpStatus(result.code));
+                                     res->setBody(Error(result.code, result.err));
+                                     return 0;
+                                 }
 
-            Json::Value data;
-            // 为了方便调试，返回验证码，生产环境应移除
-            data["code"] = result.data.code;
-            res->setBody(Ok(data));
-            return 0;
-        });
+                                 Json::Value data;
+                                 // 为了方便调试，返回验证码，生产环境应移除
+                                 data["code"] = result.data.code;
+                                 res->setBody(Ok(data));
+                                 return 0;
+                             });
 
         // 验证邮箱验证码
         dispatch->addServlet("/api/v1/common/verify-email",
-                             [](IM::http::HttpRequest::ptr req, IM::http::HttpResponse::ptr res,
-                                IM::http::HttpSession::ptr /*session*/) {
+                             [this](IM::http::HttpRequest::ptr req, IM::http::HttpResponse::ptr res,
+                                    IM::http::HttpSession::ptr /*session*/) {
                                  res->setHeader("Content-Type", "application/json");
 
                                  std::string email, code, channel;
@@ -117,7 +118,7 @@ bool CommonApiModule::onServerReady() {
                                  }
 
                                  auto result =
-                                     IM::app::CommonService::VerifyEmailCode(email, code, channel);
+                                     m_common_service->VerifyEmailCode(email, code, channel);
                                  if (!result.ok) {
                                      res->setStatus(ToHttpStatus(result.code));
                                      res->setBody(Error(result.code, result.err));

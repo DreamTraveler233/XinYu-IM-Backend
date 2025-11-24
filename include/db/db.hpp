@@ -8,7 +8,7 @@ namespace IM {
 class ISQLData {
    public:
     typedef std::shared_ptr<ISQLData> ptr;
-    virtual ~ISQLData() {}
+    virtual ~ISQLData() = default;
 
     virtual int getErrno() const = 0;
     virtual const std::string& getErrStr() const = 0;
@@ -38,7 +38,7 @@ class ISQLData {
 
 class ISQLUpdate {
    public:
-    virtual ~ISQLUpdate() {}
+    virtual ~ISQLUpdate() = default;
     virtual int execute(const char* format, ...) = 0;
     virtual int execute(const std::string& sql) = 0;
     virtual int64_t getLastInsertId() = 0;
@@ -46,7 +46,7 @@ class ISQLUpdate {
 
 class ISQLQuery {
    public:
-    virtual ~ISQLQuery() {}
+    virtual ~ISQLQuery() = default;
     virtual ISQLData::ptr query(const char* format, ...) = 0;
     virtual ISQLData::ptr query(const std::string& sql) = 0;
 };
@@ -54,7 +54,7 @@ class ISQLQuery {
 class IStmt {
    public:
     typedef std::shared_ptr<IStmt> ptr;
-    virtual ~IStmt() {}
+    virtual ~IStmt() = default;
     virtual int bindInt8(int idx, const int8_t& value) = 0;
     virtual int bindUint8(int idx, const uint8_t& value) = 0;
     virtual int bindInt16(int idx, const int16_t& value) = 0;
@@ -83,7 +83,7 @@ class IStmt {
 class ITransaction : public ISQLUpdate {
    public:
     typedef std::shared_ptr<ITransaction> ptr;
-    virtual ~ITransaction() {};
+    virtual ~ITransaction() = default;
     virtual bool begin() = 0;
     virtual bool commit() = 0;
     virtual bool rollback() = 0;
@@ -92,7 +92,7 @@ class ITransaction : public ISQLUpdate {
 class IDB : public ISQLUpdate, public ISQLQuery {
    public:
     typedef std::shared_ptr<IDB> ptr;
-    virtual ~IDB() {}
+    virtual ~IDB() = default;
 
     virtual IStmt::ptr prepare(const std::string& stmt) = 0;
     virtual int getErrno() = 0;
@@ -102,4 +102,4 @@ class IDB : public ISQLUpdate, public ISQLQuery {
 
 }  // namespace IM
 
-#endif // __IM_DB_DB_HPP__
+#endif  // __IM_DB_DB_HPP__

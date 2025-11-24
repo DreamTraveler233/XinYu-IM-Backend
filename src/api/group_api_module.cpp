@@ -28,7 +28,7 @@ bool GroupApiModule::onServerReady() {
         // 群组申请
         dispatch->addServlet(
             "/api/v1/group-apply/agree",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -36,7 +36,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-apply/all",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d;
@@ -46,7 +46,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-apply/create",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -54,7 +54,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-apply/decline",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -62,7 +62,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-apply/delete",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -70,7 +70,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-apply/list",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d;
@@ -80,7 +80,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-apply/unread-num",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d;
@@ -92,7 +92,7 @@ bool GroupApiModule::onServerReady() {
         // 群组公告
         dispatch->addServlet(
             "/api/v1/group-notice/edit",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -102,7 +102,7 @@ bool GroupApiModule::onServerReady() {
         // 群组投票
         dispatch->addServlet(
             "/api/v1/group-vote/create",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -110,7 +110,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-vote/detail",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d(Json::objectValue);
@@ -119,7 +119,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group-vote/submit",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -129,13 +129,13 @@ bool GroupApiModule::onServerReady() {
         // 群组主要接口
         dispatch->addServlet(
             "/api/v1/group/assign-admin",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
                 return 0;
             });
-        dispatch->addServlet("/api/v1/group/create", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/create", [this](IM::http::HttpRequest::ptr /*req*/,
                                                         IM::http::HttpResponse::ptr res,
                                                         IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
@@ -144,7 +144,7 @@ bool GroupApiModule::onServerReady() {
             res->setBody(Ok(d));
             return 0;
         });
-        dispatch->addServlet("/api/v1/group/detail", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/detail", [this](IM::http::HttpRequest::ptr /*req*/,
                                                         IM::http::HttpResponse::ptr res,
                                                         IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
@@ -152,7 +152,7 @@ bool GroupApiModule::onServerReady() {
             res->setBody(Ok(d));
             return 0;
         });
-        dispatch->addServlet("/api/v1/group/dismiss", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/dismiss", [this](IM::http::HttpRequest::ptr /*req*/,
                                                          IM::http::HttpResponse::ptr res,
                                                          IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
@@ -161,7 +161,7 @@ bool GroupApiModule::onServerReady() {
         });
         dispatch->addServlet(
             "/api/v1/group/get-invite-friends",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d;
@@ -169,21 +169,21 @@ bool GroupApiModule::onServerReady() {
                 res->setBody(Ok(d));
                 return 0;
             });
-        dispatch->addServlet("/api/v1/group/handover", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/handover", [this](IM::http::HttpRequest::ptr /*req*/,
                                                           IM::http::HttpResponse::ptr res,
                                                           IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
             res->setBody(Ok());
             return 0;
         });
-        dispatch->addServlet("/api/v1/group/invite", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/invite", [this](IM::http::HttpRequest::ptr /*req*/,
                                                         IM::http::HttpResponse::ptr res,
                                                         IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
             res->setBody(Ok());
             return 0;
         });
-        dispatch->addServlet("/api/v1/group/list", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/list", [this](IM::http::HttpRequest::ptr /*req*/,
                                                       IM::http::HttpResponse::ptr res,
                                                       IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
@@ -194,7 +194,7 @@ bool GroupApiModule::onServerReady() {
         });
         dispatch->addServlet(
             "/api/v1/group/member-list",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d;
@@ -202,21 +202,21 @@ bool GroupApiModule::onServerReady() {
                 res->setBody(Ok(d));
                 return 0;
             });
-        dispatch->addServlet("/api/v1/group/mute", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/mute", [this](IM::http::HttpRequest::ptr /*req*/,
                                                       IM::http::HttpResponse::ptr res,
                                                       IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
             res->setBody(Ok());
             return 0;
         });
-        dispatch->addServlet("/api/v1/group/no-speak", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/no-speak", [this](IM::http::HttpRequest::ptr /*req*/,
                                                           IM::http::HttpResponse::ptr res,
                                                           IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
             res->setBody(Ok());
             return 0;
         });
-        dispatch->addServlet("/api/v1/group/overt", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/overt", [this](IM::http::HttpRequest::ptr /*req*/,
                                                        IM::http::HttpResponse::ptr res,
                                                        IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
@@ -225,7 +225,7 @@ bool GroupApiModule::onServerReady() {
         });
         dispatch->addServlet(
             "/api/v1/group/overt-list",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 Json::Value d;
@@ -235,7 +235,7 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group/remark-update",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
@@ -243,20 +243,20 @@ bool GroupApiModule::onServerReady() {
             });
         dispatch->addServlet(
             "/api/v1/group/remove-member",
-            [](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
+            [this](IM::http::HttpRequest::ptr /*req*/, IM::http::HttpResponse::ptr res,
                IM::http::HttpSession::ptr /*session*/) {
                 res->setHeader("Content-Type", "application/json");
                 res->setBody(Ok());
                 return 0;
             });
-        dispatch->addServlet("/api/v1/group/secede", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/secede", [this](IM::http::HttpRequest::ptr /*req*/,
                                                         IM::http::HttpResponse::ptr res,
                                                         IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");
             res->setBody(Ok());
             return 0;
         });
-        dispatch->addServlet("/api/v1/group/setting", [](IM::http::HttpRequest::ptr /*req*/,
+        dispatch->addServlet("/api/v1/group/setting", [this](IM::http::HttpRequest::ptr /*req*/,
                                                          IM::http::HttpResponse::ptr res,
                                                          IM::http::HttpSession::ptr /*session*/) {
             res->setHeader("Content-Type", "application/json");

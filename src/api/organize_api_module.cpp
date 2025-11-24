@@ -26,7 +26,7 @@ bool OrganizeApiModule::onServerReady() {
         auto dispatch = http->getServletDispatch();
 
         dispatch->addServlet("/api/v1/organize/department-list",
-                             [](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
+                             [this](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
                                 IM::http::HttpSession::ptr) {
                                  res->setHeader("Content-Type", "application/json");
                                  Json::Value d;
@@ -35,7 +35,7 @@ bool OrganizeApiModule::onServerReady() {
                                  return 0;
                              });
         dispatch->addServlet("/api/v1/organize/personnel-list",
-                             [](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
+                             [this](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
                                 IM::http::HttpSession::ptr) {
                                  res->setHeader("Content-Type", "application/json");
                                  Json::Value d;
