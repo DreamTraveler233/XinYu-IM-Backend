@@ -20,3 +20,13 @@ servers:
       accept_worker: accept
       io_worker: ws_worker
       process_worker:  ws_worker
+
+    # Rock RPC 服务器配置 (用于分布式节点间通信)
+    - address: ["0.0.0.0:8060"]
+      type: rock
+      name: IM-rpc/1.0
+      timeout: 5000
+      # 分配工作池：
+      accept_worker: accept
+      io_worker: rock_worker
+      process_worker: rock_worker

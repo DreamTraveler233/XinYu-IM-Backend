@@ -13,3 +13,8 @@ workers:
     ws_worker:
         worker_num: 1
         thread_num: 4
+        
+    # 4. Rock RPC服务池 (rock_worker)
+    rock_worker:
+        worker_num: 1
+        thread_num: 4

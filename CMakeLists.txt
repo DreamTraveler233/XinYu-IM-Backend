@@ -126,7 +126,6 @@ target_include_directories(IM
         ${LIBEVENT_INCLUDE_DIRS}
         ${HIREDIS_INCLUDE_DIRS}
         ${TINYXML2_INCLUDE_DIRS}
-        # ${MULTIPART_PARSER_INCLUDE_DIRS}
 )
 
 # ==================== 依赖链接 ====================
@@ -159,25 +158,10 @@ target_link_libraries(im_server PRIVATE IM)
 # ==================== 输出目录 ====================
 # 指定可执行文件输出目录 按类型区分 (应用/测试)
 set(BIN_APP_DIR ${PROJECT_SOURCE_DIR}/bin)
-set(BIN_TEST_DIR ${PROJECT_SOURCE_DIR}/bin/tests)
 file(MAKE_DIRECTORY ${BIN_APP_DIR})
-file(MAKE_DIRECTORY ${BIN_TEST_DIR})
 
 # 指定库文件输出路径
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 # 设置 app 可执行产物输出
 set_target_properties(im_server PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_APP_DIR})
-
-# Add tests subdirectory (unit/integration), tests/ own CMakeLists handles targets
-add_subdirectory(tests)
-
-if(ENABLE_QT_CLIENT)
-    # Look for sibling XinYu-IM-QtClient directory and add it
-    if(EXISTS ${PROJECT_SOURCE_DIR}/../XinYu-IM-QtClient/CMakeLists.txt)
-        message(STATUS "ENABLE_QT_CLIENT=ON: Adding XinYu-IM-QtClient subdirectory")
-        add_subdirectory(${PROJECT_SOURCE_DIR}/../XinYu-IM-QtClient ${CMAKE_BINARY_DIR}/qtclient)
-    else()
-        message(WARNING "ENABLE_QT_CLIENT=ON but XinYu-IM-QtClient not found at ${PROJECT_SOURCE_DIR}/../XinYu-IM-QtClient")
-    endif()
-endif()
