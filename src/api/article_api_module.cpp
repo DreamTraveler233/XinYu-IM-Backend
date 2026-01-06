@@ -4,8 +4,8 @@
 #include "infra/repository/article_repository_impl.hpp"
 #include "base/macro.hpp"
 #include "common/common.hpp"
-#include "http/http_server.hpp"
-#include "http/http_servlet.hpp"
+#include "net/http/http_server.hpp"
+#include "net/http/http_servlet.hpp"
 #include "system/application.hpp"
 #include "util/util.hpp"
 

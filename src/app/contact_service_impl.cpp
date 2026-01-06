@@ -4,7 +4,7 @@
 
 #include "api/ws_gateway_module.hpp"
 #include "base/macro.hpp"
-#include "db/mysql.hpp"
+#include "infra/db/mysql.hpp"
 #include "dto/user_dto.hpp"
 #include "infra/repository/contact_repository_impl.hpp"
 

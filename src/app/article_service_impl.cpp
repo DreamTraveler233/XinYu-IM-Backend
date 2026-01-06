@@ -1,6 +1,6 @@
 #include "app/article_service_impl.hpp"
 
-#include "db/mysql.hpp"
+#include "infra/db/mysql.hpp"
 
 namespace IM::app {
 

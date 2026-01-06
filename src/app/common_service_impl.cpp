@@ -2,8 +2,8 @@
 
 #include "base/macro.hpp"
 #include "config/config.hpp"
-#include "email/email.hpp"
-#include "email/smtp.hpp"
+#include "infra/email/email.hpp"
+#include "infra/email/smtp.hpp"
 
 namespace IM::app {
 

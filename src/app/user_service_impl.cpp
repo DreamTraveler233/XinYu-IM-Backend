@@ -3,7 +3,7 @@
 #include <jsoncpp/json/json.h>
 
 #include "base/macro.hpp"
-#include "db/mysql.hpp"
+#include "infra/db/mysql.hpp"
 #include "infra/repository/user_repository_impl.hpp"
 #include "model/media_file.hpp"
 #include "util/password.hpp"

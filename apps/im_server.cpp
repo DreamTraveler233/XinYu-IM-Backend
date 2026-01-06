@@ -18,9 +18,9 @@
 #include "app/talk_service_impl.hpp"
 #include "app/user_service_impl.hpp"
 #include "base/macro.hpp"
-#include "db/mysql.hpp"
-#include "http/http_server.hpp"
-#include "http/multipart/multipart_parser.hpp"
+#include "infra/db/mysql.hpp"
+#include "net/http/http_server.hpp"
+#include "net/http/multipart/multipart_parser.hpp"
 #include "infra/repository/common_repository_impl.hpp"
 #include "infra/repository/contact_repository_impl.hpp"
 #include "infra/repository/group_repository_impl.hpp"
@@ -29,8 +29,8 @@
 #include "infra/repository/talk_repository_impl.hpp"
 #include "infra/repository/user_repository_impl.hpp"
 #include "infra/storage/istorage.hpp"
-#include "other/crypto_module.hpp"
-#include "other/module.hpp"
+#include "infra/module/crypto_module.hpp"
+#include "infra/module/module.hpp"
 #include "system/application.hpp"
 
 int main(int argc, char** argv) {

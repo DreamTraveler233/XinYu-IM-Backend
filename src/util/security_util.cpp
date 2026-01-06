@@ -1,5 +1,5 @@
 #include "util/security_util.hpp"
-#include "other/crypto_module.hpp"
+#include "infra/module/crypto_module.hpp"
 #include "util/hash_util.hpp"
 
 namespace IM::util {

@@ -5,8 +5,8 @@
 #include "common/common.hpp"
 #include "common/message_type_map.hpp"
 #include "common/validate.hpp"
-#include "http/http_server.hpp"
-#include "http/http_servlet.hpp"
+#include "net/http/http_server.hpp"
+#include "net/http/http_servlet.hpp"
 #include "system/application.hpp"
 #include "util/util.hpp"
 

@@ -7,9 +7,9 @@
 
 #include "base/macro.hpp"
 #include "common/common.hpp"
-#include "http/ws_server.hpp"
-#include "http/ws_servlet.hpp"
-#include "http/ws_session.hpp"
+#include "net/http/ws_server.hpp"
+#include "net/http/ws_servlet.hpp"
+#include "net/http/ws_session.hpp"
 #include "system/application.hpp"
 #include "util/util.hpp"
 #include "domain/repository/talk_repository.hpp"

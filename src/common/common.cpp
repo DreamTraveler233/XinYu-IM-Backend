@@ -4,8 +4,8 @@
 
 #include "base/macro.hpp"
 #include "config/config.hpp"
-#include "net/tcp_server.hpp"
-#include "other/crypto_module.hpp"
+#include "net/core/tcp_server.hpp"
+#include "infra/module/crypto_module.hpp"
 #include "util/json_util.hpp"
 
 namespace IM {

@@ -78,15 +78,15 @@ foreach(RL_FILE ${RL_SOURCES})
 endforeach()
 
 # 处理 .proto 文件，生成对应的 .pb.cc 和 .pb.h 文件
-set(NS_PROTO_FILE ${PROJECT_SOURCE_DIR}/include/ns/ns_protobuf.proto)
-set(NS_PROTO_SRC ${PROJECT_SOURCE_DIR}/include/ns/ns_protobuf.pb.cc)
-set(NS_PROTO_HEADER ${PROJECT_SOURCE_DIR}/include/ns/ns_protobuf.pb.h)
+set(NS_PROTO_FILE ${PROJECT_SOURCE_DIR}/src/ns/ns_protobuf.proto)
+set(NS_PROTO_SRC ${PROJECT_SOURCE_DIR}/src/ns/ns_protobuf.pb.cc)
+set(NS_PROTO_HEADER ${PROJECT_SOURCE_DIR}/src/ns/ns_protobuf.pb.h)
 
 add_custom_command(
     OUTPUT ${NS_PROTO_SRC} ${NS_PROTO_HEADER}
     COMMAND ${Protobuf_PROTOC_EXECUTABLE} 
-        --cpp_out=${PROJECT_SOURCE_DIR}/include/ns 
-        -I=${PROJECT_SOURCE_DIR}/include/ns 
+        --cpp_out=${PROJECT_SOURCE_DIR}/src/ns 
+        -I=${PROJECT_SOURCE_DIR}/src/ns 
         ${NS_PROTO_FILE}
     DEPENDS ${NS_PROTO_FILE}
     COMMENT "Generating protobuf files from ${NS_PROTO_FILE}"
@@ -109,7 +109,7 @@ set(LIB_SRC ${OTHER_SOURCES} ${GENERATED_SOURCES})
 # 显式添加 Roaring Bitmap 的 C 实现文件
 list(APPEND LIB_SRC ${PROJECT_SOURCE_DIR}/src/ds/roaring.c)
 # 显式添加 Multipart Parser 的 C 实现文件
-list(APPEND LIB_SRC ${PROJECT_SOURCE_DIR}/src/infra/http/multipart_parser.c)
+list(APPEND LIB_SRC ${PROJECT_SOURCE_DIR}/src/net/http/multipart/multipart_parser.c)
 
 # ==================== 主库构建 ====================
 # 生成动态库（.so）
@@ -118,7 +118,7 @@ add_library(IM SHARED ${LIB_SRC})
 # 头文件搜索路径
 target_include_directories(IM
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
     PRIVATE
         ${SQLITE3_INCLUDE_DIRS}
         ${MYSQL_INCLUDE_DIRS}

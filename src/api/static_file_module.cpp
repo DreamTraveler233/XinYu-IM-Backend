@@ -1,8 +1,8 @@
 #include "api/static_file_module.hpp"
 
 #include "config/config.hpp"
-#include "http/http_server.hpp"
-#include "http/servlets/static_servlet.hpp"
+#include "net/http/http_server.hpp"
+#include "net/http/servlets/static_servlet.hpp"
 #include "system/application.hpp"
 #include "system/env.hpp"
 

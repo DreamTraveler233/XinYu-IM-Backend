@@ -2,7 +2,7 @@
 
 #include "api/ws_gateway_module.hpp"
 #include "base/macro.hpp"
-#include "db/mysql.hpp"
+#include "infra/db/mysql.hpp"
 #include "util/time_util.hpp"
 
 namespace IM::app {
