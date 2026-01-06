@@ -13,27 +13,79 @@ namespace IM
     NgxMemPool::NgxMemPool(size_t size)
     {
         // 分配内存池，确保分配的大小不小于 NGX_MIN_POOL_SIZE
-        _pool = static_cast<NgxPool_t *>(malloc(size > NGX_MIN_POOL_SIZE ? size : NGX_MIN_POOL_SIZE));
+        const size_t allocSize = (size > (size_t)NGX_MIN_POOL_SIZE) ? size : (size_t)NGX_MIN_POOL_SIZE;
+        _pool = static_cast<NgxPool_t *>(malloc(allocSize));
         if (_pool == nullptr)
         {
             /*日志*/
-            return; // 如果内存分配失败，直接返回
+            return; // 如果内存分配失败，保持 _pool 为 nullptr
         }
 
         // 初始化内存池的 d 结构体，设置 last 和 end 指针
         _pool->d.last = (u_char *)_pool + sizeof(NgxPool_t);
-        _pool->d.end = (u_char *)_pool + size;
+        _pool->d.end = (u_char *)_pool + allocSize;
         _pool->d.next = nullptr;
         _pool->d.failed = 0;
 
         // 计算并设置内存池的最大可分配大小
-        size = size - sizeof(NgxPool_t);
-        _pool->max = (size < NGX_MAX_ALLOC_FROM_POOL) ? size : NGX_MAX_ALLOC_FROM_POOL;
+        const size_t avail = allocSize - sizeof(NgxPool_t);
+        _pool->max = (avail < (size_t)NGX_MAX_ALLOC_FROM_POOL) ? avail : (size_t)NGX_MAX_ALLOC_FROM_POOL;
 
         // 初始化内存池的其他属性
         _pool->current = _pool;
         _pool->large = nullptr;
         _pool->cleanup = nullptr;
+    }
+
+    NgxMemPool::NgxMemPool(NgxMemPool &&other) noexcept
+    {
+        _pool = other._pool;
+        other._pool = nullptr;
+    }
+
+    NgxMemPool &NgxMemPool::operator=(NgxMemPool &&other) noexcept
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        // 释放当前资源
+        if (_pool)
+        {
+            NgxPool_t *p, *n;
+            NgxPoolLarge_t *l;
+            NgxPoolCleanup_t *c;
+
+            for (c = _pool->cleanup; c; c = c->next)
+            {
+                if (c->handler)
+                {
+                    c->handler(c->data);
+                }
+            }
+
+            for (l = _pool->large; l; l = l->next)
+            {
+                if (l->alloc)
+                {
+                    free(l->alloc);
+                }
+            }
+
+            for (p = _pool, n = _pool->d.next; /* void */; p = n, n = n->d.next)
+            {
+                free(p);
+                if (n == nullptr)
+                {
+                    break;
+                }
+            }
+        }
+
+        _pool = other._pool;
+        other._pool = nullptr;
+        return *this;
     }
     /**
      * @brief NgxMemPool类的析构函数，用于释放内存池中的所有资源。
@@ -43,6 +95,11 @@ namespace IM
      */
     NgxMemPool::~NgxMemPool()
     {
+        if (_pool == nullptr)
+        {
+            return;
+        }
+
         NgxPool_t *p, *n;    // 用于遍历内存池链表的指针
         NgxPoolLarge_t *l;   // 用于遍历大内存块链表的指针
         NgxPoolCleanup_t *c; // 用于遍历清理回调函数链表的指针
@@ -87,6 +144,11 @@ namespace IM
      */
     void NgxMemPool::resetPool()
     {
+        if (_pool == nullptr)
+        {
+            return;
+        }
+
         NgxPool_t *p;
         NgxPoolLarge_t *l;
 
@@ -96,6 +158,7 @@ namespace IM
             if (l->alloc)
             {
                 free(l->alloc);
+                l->alloc = nullptr;
             }
         }
 
@@ -128,6 +191,10 @@ namespace IM
      */
     void *NgxMemPool::palloc(size_t size)
     {
+        if (_pool == nullptr)
+        {
+            return nullptr;
+        }
         // 判断请求的内存大小是否小于或等于小块内存的最大大小
         if (size <= _pool->max)
         {
@@ -149,6 +216,10 @@ namespace IM
      */
     void *NgxMemPool::pnalloc(size_t size)
     {
+        if (_pool == nullptr)
+        {
+            return nullptr;
+        }
         // 检查请求的内存大小是否小于或等于内存池的最大小块大小
         if (size <= _pool->max)
         {
@@ -169,6 +240,10 @@ namespace IM
      */
     void *NgxMemPool::pcalloc(size_t size)
     {
+        if (_pool == nullptr)
+        {
+            return nullptr;
+        }
         void *p;
 
         // 从内存池中分配指定大小的内存块
@@ -195,6 +270,10 @@ namespace IM
      */
     void *NgxMemPool::pallocSmall(size_t size, bool align)
     {
+        if (_pool == nullptr)
+        {
+            return nullptr;
+        }
         u_char *m;
         NgxPool_t *p;
 
@@ -238,6 +317,10 @@ namespace IM
      */
     void *NgxMemPool::pallocLarge(size_t size)
     {
+        if (_pool == nullptr)
+        {
+            return nullptr;
+        }
         void *p;
         u_int n;
         NgxPoolLarge_t *large;
@@ -295,6 +378,10 @@ namespace IM
      */
     void *NgxMemPool::pallocBlock(size_t size)
     {
+        if (_pool == nullptr)
+        {
+            return nullptr;
+        }
         u_char *m;
         size_t psize;
         NgxPool_t *p, *newPool;
@@ -336,6 +423,10 @@ namespace IM
     }
     NgxPoolCleanup_t *NgxMemPool::cleanupAdd(size_t size)
     {
+        if (_pool == nullptr)
+        {
+            return nullptr;
+        }
         NgxPoolCleanup_t *c;
 
         c = (NgxPoolCleanup_t *)palloc(sizeof(NgxPoolCleanup_t));
@@ -375,6 +466,10 @@ namespace IM
      */
     void NgxMemPool::pfree(void *p)
     {
+        if (_pool == nullptr || p == nullptr)
+        {
+            return;
+        }
         NgxPoolLarge_t *prev = nullptr;   // 用于记录当前节点的前一个节点
         NgxPoolLarge_t *l = _pool->large; // 获取大内存块链表的头节点
 

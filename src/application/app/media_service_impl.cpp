@@ -9,7 +9,7 @@
 
 #include "core/base/macro.hpp"
 #include "common/result.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "infra/storage/istorage.hpp"
 #include "core/system/env.hpp"
 

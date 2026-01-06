@@ -1,6 +1,6 @@
 #include "core/net/rock/rock_stream.hpp"
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/base/macro.hpp"
 #include "core/util/time_util.hpp"
 #include "core/io/worker.hpp"

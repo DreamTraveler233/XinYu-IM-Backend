@@ -1,7 +1,7 @@
 #include "application/app/common_service_impl.hpp"
 
 #include "core/base/macro.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "infra/email/email.hpp"
 #include "infra/email/smtp.hpp"
 

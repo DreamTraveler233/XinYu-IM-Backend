@@ -27,14 +27,22 @@ HttpConnection::~HttpConnection() {
 }
 
 HttpResponse::ptr HttpConnection::recvResponse() {
+    // Reuse per-connection pool memory across requests when used with HttpConnectionPool.
+    m_reqPool.resetPool();
+
     // 创建HTTP响应解析器
     HttpResponseParser::ptr parser(new HttpResponseParser);
     // 获取HTTP请求缓冲区大小
     uint64_t buff_size = HttpRequestParser::GetHttpRequestBufferSize();
     // uint64_t buff_size = 100;
-    // 分配缓冲区内存
-    std::shared_ptr<char> buffer(new char[buff_size + 1], [](char* ptr) { delete[] ptr; });
-    char* data = buffer.get();
+
+    // 分配缓冲区内存：优先走连接内存池，失败则回退到堆。
+    char* data = static_cast<char*>(m_reqPool.palloc(static_cast<size_t>(buff_size) + 1));
+    std::unique_ptr<char[]> heap_buf;
+    if (!data) {
+        heap_buf.reset(new char[buff_size + 1]);
+        data = heap_buf.get();
+    }
     int offset = 0;
 
     // 循环读取数据直到解析完成

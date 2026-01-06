@@ -14,7 +14,7 @@
 #include <memory>
 #include <string>
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "http_session.hpp"
 
 namespace IM::http {
@@ -197,7 +197,7 @@ extern IM::ConfigVar<uint32_t>::ptr g_websocket_message_max_size;
  * @param   client  是否为客户端模式
  * @return  WSFrameMessage智能指针，失败返回nullptr
  */
-WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client);
+WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client, IM::NgxMemPool* pool = nullptr);
 
 /**
  * @brief   发送一条WebSocket消息到流

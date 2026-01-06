@@ -1,7 +1,7 @@
 #include "infra/db/sqlite3.hpp"
 
 #include "core/base/macro.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/system/env.hpp"
 #include "core/util/time_util.hpp"
 

@@ -2,7 +2,7 @@
 
 #include <jsoncpp/json/json.h>
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/util/json_util.hpp"
 
 namespace IM::http {

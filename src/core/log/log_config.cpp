@@ -1,5 +1,5 @@
 #include "core/base/macro.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/log/logger_manager.hpp"
 #include "core/system/env.hpp"
 #include "core/util/util.hpp"

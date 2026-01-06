@@ -1,6 +1,6 @@
 #include "infra/db/redis.hpp"
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/util/hash_util.hpp"
 #include "core/base/macro.hpp"
 

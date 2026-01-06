@@ -3,7 +3,7 @@
 #include <jwt-cpp/jwt.h>
 
 #include "core/base/macro.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/net/core/tcp_server.hpp"
 #include "infra/module/crypto_module.hpp"
 #include "core/util/json_util.hpp"

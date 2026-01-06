@@ -1,7 +1,7 @@
 #ifndef __IM_INFRA_MODULE_CRYPTO_MODULE_HPP__
 #define __IM_INFRA_MODULE_CRYPTO_MODULE_HPP__
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "infra/module/module.hpp"
 #include "core/system/env.hpp"
 #include "core/util/crypto_util.hpp"

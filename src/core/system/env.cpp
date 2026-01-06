@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/base/macro.hpp"
 
 namespace IM {

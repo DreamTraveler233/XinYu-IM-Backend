@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #include "core/base/macro.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/io/fox_thread.hpp"
 #include "infra/db/redis.hpp"
 #include "core/net/http/ws_server.hpp"

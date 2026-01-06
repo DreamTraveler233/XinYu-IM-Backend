@@ -1,6 +1,6 @@
 #include "infra/db/mysql.hpp"
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/base/macro.hpp"
 #include "core/util/string_util.hpp"
 #include "core/util/time_util.hpp"

@@ -6,7 +6,7 @@
 
 #include "interface/api/upload_api_module.hpp"
 #include "common/common.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/net/http/http_server.hpp"
 #include "core/net/http/multipart/multipart_parser.hpp"
 #include "core/system/application.hpp"

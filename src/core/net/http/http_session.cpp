@@ -7,14 +7,22 @@ namespace IM::http {
 HttpSession::HttpSession(Socket::ptr sock, bool owner) : SocketStream(sock, owner) {}
 
 HttpRequest::ptr HttpSession::recvRequest() {
+    // Reuse per-session pool memory across keep-alive requests.
+    m_reqPool.resetPool();
+
     // 创建HTTP请求解析器实例，用于解析接收到的数据
     HttpRequestParser::ptr parser(new HttpRequestParser);
     // 获取HTTP请求缓冲区大小配置，用于控制每次读取数据的大小（防止恶意数据）
     uint64_t buff_size = HttpRequestParser::GetHttpRequestBufferSize();
     // uint64_t buff_size = 100;
-    // 分配缓冲区内存，使用智能指针管理内存自动释放
-    std::shared_ptr<char> buffer(new char[buff_size], [](char* ptr) { delete[] ptr; });
-    char* data = buffer.get();
+
+    // 分配缓冲区内存：优先走会话内存池，失败则回退到堆。
+    char* data = static_cast<char*>(m_reqPool.palloc(buff_size));
+    std::unique_ptr<char[]> heap_buf;
+    if (!data) {
+        heap_buf.reset(new char[buff_size]);
+        data = heap_buf.get();
+    }
     int offset = 0;  // 记录缓冲区中未处理数据的偏移量
 
     // 循环读取数据直到解析完成或出错

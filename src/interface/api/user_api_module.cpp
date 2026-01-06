@@ -2,7 +2,7 @@
 
 #include "core/base/macro.hpp"
 #include "common/common.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/net/http/http_server.hpp"
 #include "core/system/application.hpp"
 #include "core/util/util.hpp"

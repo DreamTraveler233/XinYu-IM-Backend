@@ -4,6 +4,7 @@
 #include <list>
 
 #include "http.hpp"
+#include "core/base/memory_pool.hpp"
 #include "core/io/lock.hpp"
 #include "core/net/streams/socket_stream.hpp"
 #include "uri.hpp"
@@ -165,6 +166,8 @@ class HttpConnection : public SocketStream {
    private:
     uint64_t m_createTime = 0;  /// 连接创建时间
     uint64_t m_request = 0;     /// 请求次数
+     // Reusable pool for per-request temporary buffers when this connection is reused.
+     IM::NgxMemPool m_reqPool;
 };
 
 class HttpConnectionPool {

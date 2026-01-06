@@ -87,7 +87,9 @@ std::string WSFrameHead::toString() const {
 }
 
 WSFrameMessage::ptr WSSession::recvMessage() {
-    return WSRecvMessage(this, false);
+    // Reuse per-session pool for per-message temporary buffers.
+    m_reqPool.resetPool();
+    return WSRecvMessage(this, false, &m_reqPool);
 }
 
 int32_t WSSession::sendMessage(WSFrameMessage::ptr msg, bool fin) {
@@ -102,7 +104,7 @@ int32_t WSSession::ping() {
     return WSPing(this);
 }
 
-WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
+WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client, IM::NgxMemPool* pool) {
     int opcode = 0;
     std::string data;
     int cur_len = 0;
@@ -151,14 +153,24 @@ WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
             if (stream->readFixSize(mask_key, sizeof(mask_key)) <= 0) break;
         }
 
-        // 读取Payload数据
-        std::string payload_data;
-        payload_data.resize(length);
+        // 读取Payload数据：优先从pool申请临时缓冲区，避免频繁堆分配。
+        const bool use_pool = (pool != nullptr);
+        char* payload_buf = nullptr;
+        std::unique_ptr<char[]> heap_payload;
+
         if (length > 0) {
-            if (stream->readFixSize(&payload_data[0], length) <= 0) break;
+            if (use_pool) {
+                payload_buf = static_cast<char*>(pool->palloc(static_cast<size_t>(length)));
+            }
+            if (!payload_buf) {
+                heap_payload.reset(new char[static_cast<size_t>(length)]);
+                payload_buf = heap_payload.get();
+            }
+
+            if (stream->readFixSize(payload_buf, length) <= 0) break;
             if (ws_head.mask) {
                 for (uint64_t i = 0; i < length; ++i) {
-                    payload_data[i] ^= mask_key[i % 4];
+                    payload_buf[i] ^= mask_key[i % 4];
                 }
             }
         }
@@ -193,7 +205,9 @@ WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
                 }
             }
 
-            data.append(payload_data);
+            if (length > 0) {
+                data.append(payload_buf, static_cast<size_t>(length));
+            }
             cur_len += length;
 
             if (!opcode && ws_head.opcode != WSFrameHead::CONTINUE) {

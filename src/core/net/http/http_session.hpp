@@ -2,6 +2,7 @@
 #define __IM_NET_HTTP_HTTP_SESSION_HPP__
 
 #include "http.hpp"
+#include "core/base/memory_pool.hpp"
 #include "core/net/streams/socket_stream.hpp"
 
 namespace IM::http {
@@ -42,6 +43,9 @@ class HttpSession : public SocketStream {
 
    protected:
     std::string m_leftoverBuf;
+     // Per-session reusable pool for short-lived buffers (per request/message).
+     // Only use it for trivially destructible / raw memory.
+     IM::NgxMemPool m_reqPool;
 };
 }  // namespace IM::http
 

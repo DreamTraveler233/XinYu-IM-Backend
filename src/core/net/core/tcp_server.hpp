@@ -22,7 +22,7 @@
 #include <memory>
 
 #include "address.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/io/iomanager.hpp"
 #include "core/base/noncopyable.hpp"
 #include "socket.hpp"

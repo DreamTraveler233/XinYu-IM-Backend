@@ -1,7 +1,7 @@
 
 #include "infra/module/module.hpp"
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "infra/module/library.hpp"
 #include "core/base/macro.hpp"
 #include "core/system/application.hpp"

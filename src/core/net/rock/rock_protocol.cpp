@@ -1,6 +1,6 @@
 #include "core/net/rock/rock_protocol.hpp"
 
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include "core/base/endian.hpp"
 #include "core/base/macro.hpp"
 #include "core/net/streams/zlib_stream.hpp"

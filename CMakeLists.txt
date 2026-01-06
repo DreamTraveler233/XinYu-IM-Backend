@@ -175,3 +175,20 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set_target_properties(im_server PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_APP_DIR})
 set_target_properties(gateway_ws PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_APP_DIR})
 set_target_properties(gateway_http PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_APP_DIR})
+
+# ==================== Tests ====================
+option(ENABLE_TESTS "Build unit tests" ON)
+
+if(ENABLE_TESTS)
+    enable_testing()
+
+    set(BIN_TEST_DIR ${PROJECT_SOURCE_DIR}/bin/tests)
+    file(MAKE_DIRECTORY ${BIN_TEST_DIR})
+
+    add_executable(test_memory_pool tests/test_memory_pool.cpp)
+    add_dependencies(test_memory_pool IM)
+    target_link_libraries(test_memory_pool PRIVATE IM)
+    set_target_properties(test_memory_pool PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_TEST_DIR})
+
+    add_test(NAME test_memory_pool COMMAND $<TARGET_FILE:test_memory_pool>)
+endif()

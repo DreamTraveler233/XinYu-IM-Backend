@@ -2,11 +2,16 @@
 #define __IM_BASE_MEMORY_POOL_HPP__
 
 #include <cstdint>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 
 namespace IM
 {
+    // Keep nginx-style type names self-contained in this header.
+    using u_char = unsigned char;
+    using u_int = unsigned int;
+
     // 定义清理操作函数指针类型
     typedef void (*NgxPoolCleanupPt)(void *data);
 
@@ -65,6 +70,10 @@ namespace IM
     public:
         /*构造函数，创建一个新的内存池，分配指定大小的内存块，并初始化内存池的各个成员变量*/
         explicit NgxMemPool(size_t size = NGX_MIN_POOL_SIZE);
+        NgxMemPool(const NgxMemPool &) = delete;
+        NgxMemPool &operator=(const NgxMemPool &) = delete;
+        NgxMemPool(NgxMemPool &&other) noexcept;
+        NgxMemPool &operator=(NgxMemPool &&other) noexcept;
         /*销毁内存池，释放所有分配的内存，并执行所有清理操作*/
         ~NgxMemPool();
         /*重置内存池，释放所有大块内存，并将小块内存的分配位置重置为初始状态*/

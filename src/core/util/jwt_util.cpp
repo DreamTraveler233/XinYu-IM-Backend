@@ -1,7 +1,7 @@
 #include "core/util/jwt_util.hpp"
 #include <jwt-cpp/jwt.h>
 #include "core/base/macro.hpp"
-#include "common/config/config.hpp"
+#include "core/config/config.hpp"
 #include <chrono>
 
 namespace IM::util {
