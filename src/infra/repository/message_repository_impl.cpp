@@ -1,6 +1,6 @@
 #include "infra/repository/message_repository_impl.hpp"
 
-#include "base/macro.hpp"
+#include "core/base/macro.hpp"
 
 namespace IM::infra::repository {
 

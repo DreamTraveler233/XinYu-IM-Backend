@@ -78,15 +78,15 @@ foreach(RL_FILE ${RL_SOURCES})
 endforeach()
 
 # 处理 .proto 文件，生成对应的 .pb.cc 和 .pb.h 文件
-set(NS_PROTO_FILE ${PROJECT_SOURCE_DIR}/src/ns/ns_protobuf.proto)
-set(NS_PROTO_SRC ${PROJECT_SOURCE_DIR}/src/ns/ns_protobuf.pb.cc)
-set(NS_PROTO_HEADER ${PROJECT_SOURCE_DIR}/src/ns/ns_protobuf.pb.h)
+set(NS_PROTO_FILE ${PROJECT_SOURCE_DIR}/src/core/ns/ns_protobuf.proto)
+set(NS_PROTO_SRC ${PROJECT_SOURCE_DIR}/src/core/ns/ns_protobuf.pb.cc)
+set(NS_PROTO_HEADER ${PROJECT_SOURCE_DIR}/src/core/ns/ns_protobuf.pb.h)
 
 add_custom_command(
     OUTPUT ${NS_PROTO_SRC} ${NS_PROTO_HEADER}
     COMMAND ${Protobuf_PROTOC_EXECUTABLE} 
-        --cpp_out=${PROJECT_SOURCE_DIR}/src/ns 
-        -I=${PROJECT_SOURCE_DIR}/src/ns 
+        --cpp_out=${PROJECT_SOURCE_DIR}/src/core/ns 
+        -I=${PROJECT_SOURCE_DIR}/src/core/ns 
         ${NS_PROTO_FILE}
     DEPENDS ${NS_PROTO_FILE}
     COMMENT "Generating protobuf files from ${NS_PROTO_FILE}"
@@ -107,9 +107,9 @@ list(FILTER OTHER_SOURCES EXCLUDE REGEX ".*/tests/.*")
 set(LIB_SRC ${OTHER_SOURCES} ${GENERATED_SOURCES})
 
 # 显式添加 Roaring Bitmap 的 C 实现文件
-list(APPEND LIB_SRC ${PROJECT_SOURCE_DIR}/src/ds/roaring.c)
+list(APPEND LIB_SRC ${PROJECT_SOURCE_DIR}/src/core/ds/roaring.c)
 # 显式添加 Multipart Parser 的 C 实现文件
-list(APPEND LIB_SRC ${PROJECT_SOURCE_DIR}/src/net/http/multipart/multipart_parser.c)
+list(APPEND LIB_SRC ${PROJECT_SOURCE_DIR}/src/core/net/http/multipart/multipart_parser.c)
 
 # ==================== 主库构建 ====================
 # 生成动态库（.so）
@@ -151,7 +151,7 @@ target_link_libraries(IM
 )
 
 # 业务服务可执行文件
-add_executable(im_server apps/im_server.cpp)
+add_executable(im_server src/bootstrap/main.cpp)
 add_dependencies(im_server IM)
 target_link_libraries(im_server PRIVATE IM)
 

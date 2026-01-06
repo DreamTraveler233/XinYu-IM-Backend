@@ -2,11 +2,11 @@
 
 #include <jwt-cpp/jwt.h>
 
-#include "base/macro.hpp"
-#include "config/config.hpp"
-#include "net/core/tcp_server.hpp"
+#include "core/base/macro.hpp"
+#include "common/config/config.hpp"
+#include "core/net/core/tcp_server.hpp"
 #include "infra/module/crypto_module.hpp"
-#include "util/json_util.hpp"
+#include "core/util/json_util.hpp"
 
 namespace IM {
 

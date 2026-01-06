@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "util/util.hpp"
+#include "core/util/util.hpp"
 
 namespace IM::infra::repository {
 

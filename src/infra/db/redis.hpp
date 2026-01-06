@@ -11,9 +11,9 @@
 #include <memory>
 #include <string>
 
-#include "io/fox_thread.hpp"
-#include "io/lock.hpp"
-#include "base/singleton.hpp"
+#include "core/io/fox_thread.hpp"
+#include "core/io/lock.hpp"
+#include "core/base/singleton.hpp"
 
 namespace IM {
 typedef std::shared_ptr<redisReply> ReplyPtr;

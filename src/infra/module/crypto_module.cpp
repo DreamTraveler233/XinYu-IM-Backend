@@ -1,8 +1,8 @@
 #include "infra/module/crypto_module.hpp"
 
-#include "base/macro.hpp"
-#include "system/application.hpp"
-#include "util/util.hpp"
+#include "core/base/macro.hpp"
+#include "core/system/application.hpp"
+#include "core/util/util.hpp"
 
 namespace IM {
 static auto g_logger = IM_LOG_NAME("system");

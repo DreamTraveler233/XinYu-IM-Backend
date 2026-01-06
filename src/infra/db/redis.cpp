@@ -1,8 +1,8 @@
 #include "infra/db/redis.hpp"
 
-#include "config/config.hpp"
-#include "util/hash_util.hpp"
-#include "base/macro.hpp"
+#include "common/config/config.hpp"
+#include "core/util/hash_util.hpp"
+#include "core/base/macro.hpp"
 
 namespace IM {
 static Logger::ptr g_logger = IM_LOG_NAME("system");

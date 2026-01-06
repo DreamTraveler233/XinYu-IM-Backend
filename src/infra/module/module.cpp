@@ -1,12 +1,12 @@
 
 #include "infra/module/module.hpp"
 
-#include "config/config.hpp"
+#include "common/config/config.hpp"
 #include "infra/module/library.hpp"
-#include "base/macro.hpp"
-#include "system/application.hpp"
-#include "system/env.hpp"
-#include "util/util.hpp"
+#include "core/base/macro.hpp"
+#include "core/system/application.hpp"
+#include "core/system/env.hpp"
+#include "core/util/util.hpp"
 
 namespace IM {
 static auto g_module_path = Config::Lookup("module.path", std::string("module"), "module path");

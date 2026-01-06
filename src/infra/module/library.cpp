@@ -2,9 +2,9 @@
 
 #include <dlfcn.h>
 
-#include "config/config.hpp"
-#include "base/macro.hpp"
-#include "system/env.hpp"
+#include "common/config/config.hpp"
+#include "core/base/macro.hpp"
+#include "core/system/env.hpp"
 
 namespace IM {
 static Logger::ptr g_logger = IM_LOG_NAME("system");

@@ -1,9 +1,9 @@
 #include "infra/db/sqlite3.hpp"
 
-#include "base/macro.hpp"
-#include "config/config.hpp"
-#include "system/env.hpp"
-#include "util/time_util.hpp"
+#include "core/base/macro.hpp"
+#include "common/config/config.hpp"
+#include "core/system/env.hpp"
+#include "core/util/time_util.hpp"
 
 namespace IM {
 static Logger::ptr g_logger = IM_LOG_NAME("system");

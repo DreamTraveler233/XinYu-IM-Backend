@@ -3,12 +3,12 @@
 
 #include <fstream>
 
-#include "base/macro.hpp"
+#include "core/base/macro.hpp"
 #include "common/common.hpp"
-#include "config/config.hpp"
+#include "common/config/config.hpp"
 #include "infra/storage/istorage.hpp"
-#include "system/env.hpp"
-#include "util/util.hpp"
+#include "core/system/env.hpp"
+#include "core/util/util.hpp"
 
 namespace IM {
 namespace infra {

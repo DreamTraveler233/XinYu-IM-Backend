@@ -5,7 +5,7 @@
 
 #include "common/result.hpp"
 #include "dto/user_dto.hpp"
-#include "net/http/http_session.hpp"
+#include "core/net/http/http_session.hpp"
 #include "model/user.hpp"
 #include "model/user_settings.hpp"
 

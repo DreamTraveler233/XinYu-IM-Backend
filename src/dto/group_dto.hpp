@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "base/macro.hpp"
+#include "core/base/macro.hpp"
 
 namespace IM::dto {
 

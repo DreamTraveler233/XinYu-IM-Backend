@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-#include "base/macro.hpp"
+#include "core/base/macro.hpp"
 
 namespace IM::model {
 

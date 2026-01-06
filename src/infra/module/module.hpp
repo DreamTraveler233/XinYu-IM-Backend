@@ -13,10 +13,10 @@
 #include <map>
 #include <unordered_map>
 
-#include "io/lock.hpp"
-#include "net/rock/rock_stream.hpp"
-#include "base/singleton.hpp"
-#include "net/core/stream.hpp"
+#include "core/io/lock.hpp"
+#include "core/net/rock/rock_stream.hpp"
+#include "core/base/singleton.hpp"
+#include "core/net/core/stream.hpp"
 
 namespace IM {
 

@@ -4,7 +4,7 @@
 #include <sstream>
 
 #include "email.hpp"
-#include "net/streams/socket_stream.hpp"
+#include "core/net/streams/socket_stream.hpp"
 
 namespace IM {
 

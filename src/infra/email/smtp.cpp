@@ -1,6 +1,6 @@
 #include "infra/email/smtp.hpp"
 
-#include "base/macro.hpp"
+#include "core/base/macro.hpp"
 #include <cctype>
 
 namespace IM {

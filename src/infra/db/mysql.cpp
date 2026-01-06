@@ -1,9 +1,9 @@
 #include "infra/db/mysql.hpp"
 
-#include "config/config.hpp"
-#include "base/macro.hpp"
-#include "util/string_util.hpp"
-#include "util/time_util.hpp"
+#include "common/config/config.hpp"
+#include "core/base/macro.hpp"
+#include "core/util/string_util.hpp"
+#include "core/util/time_util.hpp"
 
 namespace IM {
 static auto g_logger = IM_LOG_NAME("system");

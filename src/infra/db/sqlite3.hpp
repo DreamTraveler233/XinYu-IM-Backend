@@ -9,9 +9,9 @@
 #include <string>
 
 #include "db.hpp"
-#include "io/lock.hpp"
-#include "base/noncopyable.hpp"
-#include "base/singleton.hpp"
+#include "core/io/lock.hpp"
+#include "core/base/noncopyable.hpp"
+#include "core/base/singleton.hpp"
 
 namespace IM {
 class SQLite3Stmt;

@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "db.hpp"
-#include "io/lock.hpp"
-#include "base/singleton.hpp"
+#include "core/io/lock.hpp"
+#include "core/base/singleton.hpp"
 
 namespace IM {
 

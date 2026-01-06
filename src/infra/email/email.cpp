@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "util/util.hpp"
+#include "core/util/util.hpp"
 
 namespace IM {
 EMailEntity::ptr EMailEntity::CreateAttach(const std::string& filename) {

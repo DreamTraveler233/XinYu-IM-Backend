@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "base/macro.hpp"
+#include "core/base/macro.hpp"
 #include "common/common.hpp"
 #include "dto/article_dto.hpp"
 

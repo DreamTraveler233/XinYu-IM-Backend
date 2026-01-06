@@ -1,0 +1,50 @@
+#include "interface/api/organize_api_module.hpp"
+
+#include "core/base/macro.hpp"
+#include "common/common.hpp"
+#include "core/net/http/http_server.hpp"
+#include "core/net/http/http_servlet.hpp"
+#include "core/system/application.hpp"
+#include "core/util/util.hpp"
+
+namespace IM::api {
+
+static auto g_logger = IM_LOG_NAME("root");
+
+OrganizeApiModule::OrganizeApiModule() : Module("api.organize", "0.1.0", "builtin") {}
+
+bool OrganizeApiModule::onServerReady() {
+    std::vector<IM::TcpServer::ptr> httpServers;
+    if (!IM::Application::GetInstance()->getServer("http", httpServers)) {
+        IM_LOG_WARN(g_logger) << "no http servers found when registering organize routes";
+        return true;
+    }
+
+    for (auto& s : httpServers) {
+        auto http = std::dynamic_pointer_cast<IM::http::HttpServer>(s);
+        if (!http) continue;
+        auto dispatch = http->getServletDispatch();
+
+        dispatch->addServlet("/api/v1/organize/department-list",
+                             [this](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
+                                IM::http::HttpSession::ptr) {
+                                 res->setHeader("Content-Type", "application/json");
+                                 Json::Value d;
+                                 d["list"] = Json::Value(Json::arrayValue);
+                                 res->setBody(Ok(d));
+                                 return 0;
+                             });
+        dispatch->addServlet("/api/v1/organize/personnel-list",
+                             [this](IM::http::HttpRequest::ptr, IM::http::HttpResponse::ptr res,
+                                IM::http::HttpSession::ptr) {
+                                 res->setHeader("Content-Type", "application/json");
+                                 Json::Value d;
+                                 d["list"] = Json::Value(Json::arrayValue);
+                                 res->setBody(Ok(d));
+                                 return 0;
+                             });
+    }
+    return true;
+}
+
+}  // namespace IM::api
