@@ -465,7 +465,7 @@ bool UserApiModule::onServerReady() {
 }
 
 bool UserApiModule::onServerUp() {
-    registerService("http", "im", "http");
+    registerService("http", "im", "gateway-http");
     return true;
 }
 

@@ -1,23 +1,28 @@
 # XinYu IM Backend
 
-XinYu IM Backend 是一个采用 C++17 构建的实时即时通讯服务端，提供 HTTP API、WebSocket 网关、媒体上传、联系人/群组管理、消息流以及静态资源托管能力。核心进程为 `im_server`，通过模块化架构（API → 应用服务 → 仓储/基础设施）实现清晰的业务层次，可在单机或多实例部署场景中运行。
+XinYu IM Backend 是一个基于 **C++17** 构建的高性能、**分布式架构**即时通讯服务端。项目正在从传统的单体架构演进为微服务体系，目前已实现核心网关层（Gateway）的彻底分离。它不仅提供 RESTful API 和 WebSocket 长连接服务，还集成了媒体处理、关系链管理及分布式消息路由能力。
 
-## 功能亮点
-- **多协议接入**：`server.yaml` 同时定义 REST(HTTP) 与 WebSocket 服务，满足同步请求与长连接推送场景。
-- **完备的业务域**：包含用户、联系人、会话、群聊、消息、媒体上传、文章/表情占位模块以及静态文件托管模块。
-- **分层设计**：`src/api`, `src/app`, `src/infra`, `src/ds` 等目录分别承载接口、领域服务、仓储/适配器与底层数据结构，实现解耦。
-- **可配置运行时**：所有运行参数基于 YAML (`conf/*.yaml`) 管理，涵盖服务器监听、线程池、日志、加密密钥、MySQL/Redis 等资源。
-- **生产级依赖**：使用 Protobuf、OpenSSL、libevent、hiredis、jwt-cpp、yaml-cpp、tinyxml2 等成熟组件，支持 Ragel 生成状态机与 ZooKeeper 服务发现。
-- **脚本与基准**：提供 `autobuild.sh`、`scripts/*` 工具链以及 `bench_results/` 样例报告，便于持续集成与性能回归。
+## 核心亮点
+
+- **分布式网关架构**：
+    - **`gateway_http`**：专门处理无状态的 REST 业务请求，负责鉴权、资料同步及业务逻辑触发。
+    - **`gateway_ws`**：高性能长连接网关，负责百万级连接维护、心跳检测及下行消息精准推送。
+- **跨进程通讯 (Rock RPC)**：基于自定义 Rock 协议实现网关间的信令投递。即使客户端连接在不同的网关节点，系统也能通过内部 RPC 链路实现实时消息送达。
+- **服务发现与自治**：深度集成 **ZooKeeper**，实现网关节点的自动注册与发现 (Service Discovery)。系统能够实时感知节点变更，支持动态扩容与负载均衡。
+- **高性能底层支撑**：
+    - 采用 **Libevent + 协程 (Coroutine)** 模型，兼顾开发效率与极致并发性能。
+    - 针对 IM 场景深度优化，支持消息幂等性检查、图片/视频多级缩略图生成及本地/云端存储适配。
+- **分层领域模型**：严格遵循分层架构 (API → Application → Infrastructure)，业务逻辑与存储介质彻底解耦，易于扩展与维护。
 
 ## 仓库结构概览
 | 路径 | 说明 |
 | --- | --- |
-| `src/` | 主要业务实现，按 interface/application/infrastructure/... 分层。 |
-| `bin/config/` | 配置文件目录，包含网关分离配置及集群模版。位于 `bin` 目录下以支持自适应相对路径。 |
-| `migrations/` | MySQL 初始化与增量脚本（按编号依次执行）。 |
-| `bin/` | 构建输出：`im_server` (单体)、`gateway_http` (API网关)、`gateway_ws` (WS网关)。 |
-| `scripts/` | 辅助脚本：集群管理、网关启停、数据库迁移、压力测试等。 |
+| `src/interface/` | 接口层：HTTP Servolets、WebSocket 处理及 RPC 模块实现。 |
+| `src/application/` | 应用服务层：处理聊天逻辑、好友添加、群组管理等。 |
+| `src/infrastructure/` | 基础设施层：MySQL/Redis 仓储适配、加密算法及云存储实现。 |
+| `bin/config/` | 配置文件目录：包含 `gateway_http` 和 `gateway_ws` 的独立配置模板。 |
+| `bin/` | 构建产物：`gateway_http` (API网关)、`gateway_ws` (WS网关)、`im_server` (兼容单体)。 |
+| `scripts/` | 自动化工具：`gateways_run.sh` (网关启停)、`sql/` (数据库迁移)、`bench/` (性能压测)。 |
 
 ## 依赖与环境要求
 - CMake ≥ 3.10，Make/ninja，ccache(可选)。
@@ -35,81 +40,80 @@ sudo apt install build-essential cmake pkg-config ccache ragel \
 ```
 
 ## 快速上手
-1. **克隆与子模块**（如使用）：
-   ```bash
-   git clone https://github.com/.../XinYu-IM-Backend.git
-   cd XinYu-IM-Backend
-   ```
-2. **准备数据库**：
-   ```bash
-   mysql -u root -p < migrations/001_init_db.sql
-   mysql -u root -p < migrations/002_table.sql
-   # 依次执行到 090_upload.sql
-   ```
-3. **配置文件**：
-   - 默认读取 `./conf` 目录，可先复制样例：
-     ```bash
-     mkdir -p conf
-     cp -r bin/config/* conf/
-     ```
-   - 根据环境修改各 YAML（参考下文“配置说明”）。
-4. **构建**：
-   - 快捷脚本：`./autobuild.sh`
-   - 或使用标准 CMake：
-     ```bash
-     mkdir -p build && cd build
-     cmake -DCMAKE_BUILD_TYPE=Release ..
-     cmake --build . -- -j$(nproc)
-     cd ..
-     ```
-5. **运行服务**：
-   ```bash
-   ./bin/im_server -s -c conf        # 前台运行
-   ./bin/im_server -d -c conf        # 以守护进程运行
-   ```
-   - `-s`/`-d` 控制前台或后台；`-c` 指定配置目录；`-h` 查看内置帮助。
-   - 运行时会在 `server.work_path`（默认 `apps/work/IM`）下写入 PID、日志与临时文件。
 
-## 配置说明（conf/*.yaml）
-- `system.yaml`
-  - `server.work_path` / `pid_file`：运行时工作目录与 PID 文件。
-  - `auth.jwt`：JWT 密钥、签发者与有效期。
-  - `machine.code`：雪花/ID 预留字段，用于多实例区分。
-  - `crypto.*`：RSA 密钥路径 & padding。
-  - `mysql.dbs.default`：主库连接信息与连接池大小。
-  - `websocket.message.max_size` 等：WS 层参数。
-- `server.yaml`：HTTP / WebSocket 监听地址、KeepAlive、超时、线程池绑定。
-- `workers.yaml`：`accept`, `http_worker`, `ws_worker` 的 worker/thread 数量。
-- `log.yaml`：日志级别、输出到文件/STDOUT、滚动策略（小时/大小）。
-- `media.yaml`：上传根目录、分片大小、临时目录清理策略。
-- `email.yaml` / `sms.yaml`：验证码、SMTP/短信网关配置，可禁用对应通道。
+1. **基础环境准备**：
+   ```bash
+   # 启动 MySQL, Redis, ZooKeeper
+   ./scripts/start_env.sh
+   # 执行数据库迁移
+   ./scripts/sql/migrate.sh apply
+   ```
 
-> 将敏感信息（数据库密码、JWT secret、SMTP/短信凭据、RSA 密钥）替换为生产值，并确保 `server.work_path` 与媒体目录具备写权限。
+2. **编译代码**：
+   ```bash
+   ./scripts/build.sh
+   ```
+
+3. **启动网关服务**：
+   项目目前采用网关分离部署模式，由专用脚本管理：
+   ```bash
+   # 一键启动 HTTP 与 WebSocket 网关
+   ./scripts/gateways_run.sh start
+   # 查看运行状态与监听端口
+   ./scripts/gateways_run.sh status
+   ```
+
+4. **客户端连接**：
+   - **HTTP API**: `http://127.0.0.1:8080/api/v1/...`
+   - **WebSocket**: `ws://127.0.0.1:8081?token=...&platform=pc`
+   - **内部 RPC**: `127.0.0.1:8060` (仅供服务间调用)
+
+## 设计理念与架构演进
+
+项目正依照 **[分布式IM服务器项目计划书.md](分布式IM服务器项目计划书.md)** 进行分阶段重构。
+
+- **Phase 1（当前）**：网关分离。将单体拆分为 `gateway_http` 和 `gateway_ws`，解决单进程并发瓶颈，引入 RPC 投递机制。
+- **Phase 2（计划中）**：全局在线路由 (Presence)。利用 Redis 记录用户会话映射，实现多节点间的推送寻址。
+- **Phase 3（计划中）**：业务核心拆分。将消息存储、离线记录、关系链提取为独立服务。
 
 ## 运行与部署提示
-- `apps/work/IM` 需要可写权限；若部署到 `/var/lib/xinyu-im` 等目录，请在 `system.yaml` 中同步更新。
-- 如果启用 ZooKeeper，请在 `system.yaml` 配置 `service_discovery.zk`。
-- WebSocket 与 HTTP 默认监听 `0.0.0.0:8080/8081`（可在 `server.yaml` 调整）。
-- 静态资源与上传文件默认写入 `media.upload_base_dir`（建议使用绝对路径或挂载的对象存储网关）。
-- `ENABLE_QT_CLIENT=ON` 可在同一 CMake 工程中构建桌面客户端（会尝试添加 `../XinYu-IM-QtClient`）。
+- **相对路径支持**：所有二进制程序均默认从 `bin/config/` 读取配置。
+- **日志观察**：网关日志分别记录在 `bin/log/gateway_http/` 和 `bin/log/gateway_ws/`。
+- **动态扩容**：若需部署多个 WS 网关实例，物理复制 `bin/config/gateway_ws` 目录并修改 `server.yaml` 中的监听端口及 ZK 注册信息即可。
 
-## 测试
-- 构建后测试产物位于 `bin/tests/`（详见 `tests/README.md`）。
-- 示例运行：
+## 配置说明 (bin/config/)
+
+项目配置文件采用子目录隔离模式，确保不同职责的网关进程互不干扰。
+
+- **`gateway_http/`**：HTTP 网关配置，重点在于 `server.yaml` 中的 `http` 监听。
+- **`gateway_ws/`**：WS 网关配置，重点在于 `server.yaml` 中的 `ws` 与 `rock` 监听。
+
+### 核心配置文件：
+- **`system.yaml`**：
+    - `server.work_path`：网关的运行时工作目录（如 `bin/apps/work/gateway_ws`）。
+    - `server.pid_file`：进程 PID 文件名，确保网关可独立启停。
+    - `service_discovery.zk`：ZooKeeper 地址，用于节点注册。
+    - `mysql.dbs.default` / `redis.nodes`：数据库与缓存连接配置。
+- **`server.yaml`**：协议类型（http/ws/rock）、监听地址及超时参数。
+- **`log.yaml`**：日志级别与路径。建议设置为 `bin/log/gateway_xxx/` 以便区分。
+- **`media.yaml`**：媒体文件上传的基准路径与存储策略。
+
+## 测试与基准
+
+- **单元测试**：构建产出物位于 `bin/tests/`。
   ```bash
+  # 示例：运行媒体服务测试
   ./bin/tests/test_media
   ```
-- 新增测试：在 `tests/unit` 或 `tests/integration` 添加 `*.cpp` 并更新 `tests/CMakeLists.txt`。
-
-## 基准与辅助脚本
-- `bench_results/<timestamp>/`：包含 API 压测、媒体上传测试的原始日志、CSV、HTML 报告与图表，可作为性能基线。
-- `scripts/bench/`：压测驱动脚本；`scripts/docker/`：容器化模板；`scripts/sql/`：数据库工具；`scripts/tooling/`：开发者辅助脚本。
+- **自动化压测**：
+  `scripts/bench/` 提供了基于 `wrk` 的压测脚本。运行后会在 `bench_results/` 生成可视化 HTML 报告。
 
 ## 常见问题
-- **缺少 Ragel/Protobuf**：确保已安装 `ragel`、`protobuf-compiler` 并在 `PATH`/`PKG_CONFIG_PATH` 中可见。
-- **连接数据库失败**：检查 `mysql.dbs.default`、网络连通性与权限；可使用 `mysql --defaults-extra-file` 进行验证。
-- **工作目录不可写**：修改 `system.yaml` 的 `server.work_path` 或为当前用户授予写权限。
-- **日志未生成**：确认 `log.yaml` 路径相对于运行目录存在，并确保 `log/` 文件夹可写。
+
+- **端口冲突**：确保 `gateway_http` (8080) 与 `gateway_ws` (8081, 8060) 端口配置互不重叠。
+- **RPC 无法连通**：检查 `gateway_ws` 的 Rock RPC 端口是否放行，且后端服务能正确从 ZooKeeper 获取 `gateway-ws-rpc` 节点。
+- **工作目录写权限**：网关在启动时会尝试锁定 `work_path` 下的 PID 文件，请确保该目录对运行用户可见且可写。
 
 ## 贡献
-欢迎通过 Issue/PR 报告问题或提交改进。请在提交代码前运行相关测试与格式化工具（`.clang-format`, `.clang-tidy`, `.pre-commit-config.yaml`）。
+
+欢迎提交 Issue 或 PR。在提交代码前建议运行 `.clang-format` 进行格式化，并确保所有单元测试通过。

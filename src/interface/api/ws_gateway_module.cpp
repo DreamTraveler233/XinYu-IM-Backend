@@ -22,11 +22,12 @@ static auto g_logger = IM_LOG_NAME("root");
 static IM::domain::repository::ITalkRepository::Ptr s_talk_repo = nullptr;
 
 WsGatewayModule::WsGatewayModule(IM::domain::service::IUserService::Ptr user_service,
-                                                                 IM::domain::repository::ITalkRepository::Ptr talk_repo)
-        : Module("ws.gateway", "0.1.0", "builtin"), m_user_service(std::move(user_service)),
-            m_talk_repo(std::move(talk_repo)) {
-        // 保存静态引用，供静态方法使用
-        s_talk_repo = m_talk_repo;
+                                 IM::domain::repository::ITalkRepository::Ptr talk_repo)
+    : RockModule("ws.gateway", "0.1.0", "builtin"),
+      m_user_service(std::move(user_service)),
+      m_talk_repo(std::move(talk_repo)) {
+    // 保存静态引用，供静态方法使用
+    s_talk_repo = m_talk_repo;
 }
 
 // 简易查询串解析（假设无需URL解码，前端传递 token 直接可用）
@@ -285,8 +286,45 @@ bool WsGatewayModule::onServerReady() {
 }
 
 bool WsGatewayModule::onServerUp() {
-    registerService("ws", "im", "ws");
+    registerService("ws", "im", "gateway-ws");
+    registerService("rock", "im", "gateway-ws-rpc");
     return true;
+}
+
+bool WsGatewayModule::handleRockRequest(IM::RockRequest::ptr request, IM::RockResponse::ptr response,
+                                       IM::RockStream::ptr stream) {
+    // 处理指令：101 - 跨进程消息投递
+    if (request->getCmd() == 101) {
+        Json::Value body;
+        if (!IM::JsonUtil::FromString(body, request->getBody())) {
+            response->setResult(400);
+            response->setResultStr("invalid json body");
+            return true;
+        }
+
+        uint64_t uid = IM::JsonUtil::GetUint64(body, "uid");
+        std::string event = IM::JsonUtil::GetString(body, "event");
+        Json::Value payload = body["payload"];
+
+        if (uid == 0 || event.empty()) {
+            response->setResult(400);
+            response->setResultStr("missing uid or event");
+            return true;
+        }
+
+        // 核心：调用本地推送逻辑
+        IM_LOG_INFO(g_logger) << "RPC Deliver: uid=" << uid << " event=" << event;
+        PushToUser(uid, event, payload);
+
+        response->setResult(200);
+        return true;
+    }
+
+    return false;
+}
+
+bool WsGatewayModule::handleRockNotify(IM::RockNotify::ptr notify, IM::RockStream::ptr stream) {
+    return false;
 }
 
 // ===== 主动推送接口实现 =====

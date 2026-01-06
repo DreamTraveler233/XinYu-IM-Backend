@@ -7,7 +7,7 @@
 
 namespace IM::api {
 
-class WsGatewayModule : public IM::Module {
+class WsGatewayModule : public IM::RockModule {
    public:
     WsGatewayModule(IM::domain::service::IUserService::Ptr user_service,
                     IM::domain::repository::ITalkRepository::Ptr talk_repo);
@@ -15,6 +15,14 @@ class WsGatewayModule : public IM::Module {
 
     bool onServerReady() override;
     bool onServerUp() override;
+
+    /**
+     * @brief 处理来自 Rock RPC 接口的推送请求
+     */
+    bool handleRockRequest(IM::RockRequest::ptr request, IM::RockResponse::ptr response,
+                           IM::RockStream::ptr stream) override;
+
+    bool handleRockNotify(IM::RockNotify::ptr notify, IM::RockStream::ptr stream) override;
 
     // 主动推送通用事件到指定用户的所有在线连接
     static void PushToUser(uint64_t uid, const std::string& event,
