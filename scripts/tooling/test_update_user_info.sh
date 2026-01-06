@@ -7,8 +7,8 @@ set -euo pipefail
 # with empty nickname/avatar/motto and verifies DB fields become NULL.
 
 ROOT_DIR=$(cd "$(dirname "$0")/../.." && pwd)
-CONFIG="$ROOT_DIR/bin/config/system.yaml"
-MEDIA_CONFIG="$ROOT_DIR/bin/config/media.yaml"
+CONFIG="$ROOT_DIR/bin/config/gateway_http/system.yaml"
+MEDIA_CONFIG="$ROOT_DIR/bin/config/gateway_http/media.yaml"
 
 PY_CONF=$(python3 - "$CONFIG" <<PY
 import yaml, sys

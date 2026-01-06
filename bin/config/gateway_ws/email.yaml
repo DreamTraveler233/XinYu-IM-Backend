@@ -1,0 +1,16 @@
+email:
+  enabled: true                  # 是否启用邮件服务
+  code_ttl_secs: 600             # 邮件验证码有效期，单位秒
+  code_cleanup_interval: 3600    # 邮件验证码清理周期，单位秒
+
+smtp:
+  host: "smtp.qq.com"             # SMTP 服务器地址 (示例: smtp.qq.com)
+  port: 465                       # SMTP 端口 (SSL通常为465, 非SSL为25)
+  ssl: true                       # 是否使用 SSL
+  auth:
+    user: "3027460939@qq.com"    # SMTP 登录用户名（一般为邮箱或 API KEY）
+    pass: "paxdywwtchjaddag"      # SMTP 密码/授权码 / API Key
+  from:
+    name: "心语IM 开发团队"        # 发件人显示名称
+    address: "3027460939@qq.com" # 发件人邮箱地址
+  debug: false                     # 是否开启 SMTP 调试日志

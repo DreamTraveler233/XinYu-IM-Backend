@@ -12,6 +12,7 @@ class UserApiModule : public IM::Module {
     ~UserApiModule() override = default;
 
     bool onServerReady() override;
+    bool onServerUp() override;
 
    private:
     IM::domain::service::IUserService::Ptr m_user_service;

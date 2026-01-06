@@ -168,7 +168,7 @@ bool ZKServiceDiscovery::existsOrCreate(const std::string& path) {
         if (pos == 0 || existsOrCreate(path.substr(0, pos))) {
             std::string new_val(1024, 0);
             v = m_client->create(path, "", new_val);
-            if (v != ZOK) {
+            if (v != ZOK && v != ZNODEEXISTS) {
                 IM_LOG_ERROR(g_logger)
                     << "create path=" << path << " error:" << zerror(v) << " (" << v << ")";
                 return false;

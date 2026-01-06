@@ -4,7 +4,7 @@
 
 - 迁移文件目录：`migrations/`（按数字前缀排序执行）
 - 迁移状态表：`schema_migrations`（自动创建于目标库中）
-- 默认数据库连接：从 `bin/config/system.yaml` 的 `mysql.dbs.default` 读取
+- 默认数据库连接：从 `bin/config/gateway_http/system.yaml` 的 `mysql.dbs.default` 读取
 
 ## 可用命令
 

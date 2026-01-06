@@ -1,0 +1,20 @@
+workers:
+    # 1. 连接接收池 (accept_worker)
+    accept:
+        worker_num: 1
+        thread_num: 2
+
+    # 2. HTTP服务池 (http_worker)
+    http_worker:
+        worker_num: 1
+        thread_num: 4
+
+    # 3. WebSocket服务池 (ws_worker)
+    ws_worker:
+        worker_num: 1
+        thread_num: 4
+        
+    # 4. Rock RPC服务池 (rock_worker)
+    rock_worker:
+        worker_num: 1
+        thread_num: 4

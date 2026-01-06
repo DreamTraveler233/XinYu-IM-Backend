@@ -1,0 +1,108 @@
+#include "interface/api/article_api_module.hpp"
+#include "interface/api/common_api_module.hpp"
+#include "interface/api/contact_api_module.hpp"
+#include "interface/api/emoticon_api_module.hpp"
+#include "interface/api/group_api_module.hpp"
+#include "interface/api/message_api_module.hpp"
+#include "interface/api/organize_api_module.hpp"
+#include "interface/api/static_file_module.hpp"
+#include "interface/api/talk_api_module.hpp"
+#include "interface/api/upload_api_module.hpp"
+#include "interface/api/user_api_module.hpp"
+#include "application/app/common_service_impl.hpp"
+#include "application/app/contact_service_impl.hpp"
+#include "application/app/group_service_impl.hpp"
+#include "application/app/media_service_impl.hpp"
+#include "application/app/message_service_impl.hpp"
+#include "application/app/talk_service_impl.hpp"
+#include "application/app/user_service_impl.hpp"
+#include "core/base/macro.hpp"
+#include "infra/db/mysql.hpp"
+#include "core/net/http/http_server.hpp"
+#include "core/net/http/multipart/multipart_parser.hpp"
+#include "infra/repository/common_repository_impl.hpp"
+#include "infra/repository/contact_repository_impl.hpp"
+#include "infra/repository/group_repository_impl.hpp"
+#include "infra/repository/media_repository_impl.hpp"
+#include "infra/repository/message_repository_impl.hpp"
+#include "infra/repository/talk_repository_impl.hpp"
+#include "infra/repository/user_repository_impl.hpp"
+#include "infra/storage/istorage.hpp"
+#include "infra/module/crypto_module.hpp"
+#include "infra/module/module.hpp"
+#include "core/system/application.hpp"
+
+/**
+ * @brief HTTP API 网关进程入口
+ * 
+ * 责任：
+ * 1. 提供 RESTful API
+ * 2. 处理用户登录、注册、资料管理
+ * 3. 业务逻辑触发（调用后端服务）
+ */
+int main(int argc, char** argv) {
+    /* 创建并初始化应用程序实例 */
+    IM::Application app;
+    if (!app.init(argc, argv)) {
+        IM_LOG_ERROR(IM_LOG_ROOT()) << "Gateway HTTP init failed";
+        return 1;
+    }
+
+    std::srand(std::time(nullptr));
+
+    // 注册加解密模块
+    IM::ModuleMgr::GetInstance()->add(std::make_shared<IM::CryptoModule>());
+
+    /* 注册 API 模块 */
+    IM::ModuleMgr::GetInstance()->add(std::make_shared<IM::api::ArticleApiModule>());
+    IM::ModuleMgr::GetInstance()->add(std::make_shared<IM::api::EmoticonApiModule>());
+    IM::ModuleMgr::GetInstance()->add(std::make_shared<IM::api::OrganizeApiModule>());
+
+    auto db_manager =
+        std::shared_ptr<IM::MySQLManager>(IM::MySQLMgr::GetInstance(), [](IM::MySQLManager*) {});
+
+    // Repositories
+    auto user_repo = std::make_shared<IM::infra::repository::UserRepositoryImpl>(db_manager);
+    auto contact_repo = std::make_shared<IM::infra::repository::ContactRepositoryImpl>(db_manager);
+    auto common_repo = std::make_shared<IM::infra::repository::CommonRepositoryImpl>(db_manager);
+    auto upload_repo = std::make_shared<IM::infra::repository::MediaRepositoryImpl>(db_manager);
+    auto message_repo = std::make_shared<IM::infra::repository::MessageRepositoryImpl>(db_manager);
+    auto talk_repo = std::make_shared<IM::infra::repository::TalkRepositoryImpl>(db_manager);
+    auto group_repo = std::make_shared<IM::infra::repository::GroupRepositoryImpl>();
+
+    // Services
+    auto storage_adapter = IM::infra::storage::CreateLocalStorageAdapter();
+    auto media_service = std::make_shared<IM::app::MediaServiceImpl>(upload_repo, storage_adapter);
+    auto multipart_parser = IM::http::multipart::CreateMultipartParser();
+    auto common_service = std::make_shared<IM::app::CommonServiceImpl>(common_repo);
+    auto user_service = std::make_shared<IM::app::UserServiceImpl>(user_repo, media_service,
+                                                                   common_service, talk_repo);
+    auto message_service = std::make_shared<IM::app::MessageServiceImpl>(message_repo, talk_repo,
+                                                                         user_repo, contact_repo);
+    auto talk_service = std::make_shared<IM::app::TalkServiceImpl>(talk_repo, contact_repo,
+                                                                   message_repo, group_repo);
+    auto contact_service = std::make_shared<IM::app::ContactServiceImpl>(
+        contact_repo, user_repo, talk_repo, message_service, talk_service);
+    auto group_service = std::make_shared<IM::app::GroupServiceImpl>(group_repo, user_repo,
+                                                                     message_service, talk_service);
+
+    // Register API modules
+    IM::ModuleMgr::GetInstance()->add(std::make_shared<IM::api::UserApiModule>(user_service));
+    IM::ModuleMgr::GetInstance()->add(
+        std::make_shared<IM::api::ContactApiModule>(contact_service, user_service));
+    IM::ModuleMgr::GetInstance()->add(
+        std::make_shared<IM::api::CommonApiModule>(common_service, user_service));
+    IM::ModuleMgr::GetInstance()->add(
+        std::make_shared<IM::api::UploadApiModule>(media_service, multipart_parser));
+    IM::ModuleMgr::GetInstance()->add(std::make_shared<IM::api::MessageApiModule>(message_service));
+    IM::ModuleMgr::GetInstance()->add(
+        std::make_shared<IM::api::TalkApiModule>(talk_service, user_service, message_service));
+    IM::ModuleMgr::GetInstance()->add(
+        std::make_shared<IM::api::GroupApiModule>(group_service, contact_service));
+
+    // 静态文件服务模块
+    IM::ModuleMgr::GetInstance()->add(std::make_shared<IM::api::StaticFileModule>());
+
+    IM_LOG_INFO(IM_LOG_ROOT()) << "Gateway HTTP is starting...";
+    return app.run() ? 0 : 2;
+}

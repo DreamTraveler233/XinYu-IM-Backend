@@ -1,0 +1,11 @@
+servers:
+    # HTTP 资源服务器配置
+    - address: ["0.0.0.0:8080"]
+      type: http
+      name: IM-http-gateway/1.1
+      keepalive: 1
+      timeout: 1000
+      # 分配工作池：
+      accept_worker: accept
+      io_worker: http_worker
+      process_worker:  http_worker

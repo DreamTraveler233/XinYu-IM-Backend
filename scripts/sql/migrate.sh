@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MIGRATIONS_DIR="$ROOT_DIR/migrations"
-CONFIG_FILE="$ROOT_DIR/bin/config/system.yaml"
+CONFIG_FILE="$ROOT_DIR/bin/config/gateway_http/system.yaml"
 
 CMD="${1:-}"; shift || true
 

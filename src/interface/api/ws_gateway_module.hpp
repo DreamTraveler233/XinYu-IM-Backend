@@ -14,6 +14,7 @@ class WsGatewayModule : public IM::Module {
     ~WsGatewayModule() override = default;
 
     bool onServerReady() override;
+    bool onServerUp() override;
 
     // 主动推送通用事件到指定用户的所有在线连接
     static void PushToUser(uint64_t uid, const std::string& event,

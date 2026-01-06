@@ -284,6 +284,11 @@ bool WsGatewayModule::onServerReady() {
     return true;
 }
 
+bool WsGatewayModule::onServerUp() {
+    registerService("ws", "im", "ws");
+    return true;
+}
+
 // ===== 主动推送接口实现 =====
 void WsGatewayModule::PushToUser(uint64_t uid, const std::string& event, const Json::Value& payload,
                                  const std::string& ackid) {

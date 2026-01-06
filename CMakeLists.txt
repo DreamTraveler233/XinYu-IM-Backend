@@ -155,6 +155,14 @@ add_executable(im_server src/bootstrap/main.cpp)
 add_dependencies(im_server IM)
 target_link_libraries(im_server PRIVATE IM)
 
+add_executable(gateway_ws src/bootstrap/gateway_ws.cpp)
+add_dependencies(gateway_ws IM)
+target_link_libraries(gateway_ws PRIVATE IM)
+
+add_executable(gateway_http src/bootstrap/gateway_http.cpp)
+add_dependencies(gateway_http IM)
+target_link_libraries(gateway_http PRIVATE IM)
+
 # ==================== 输出目录 ====================
 # 指定可执行文件输出目录 按类型区分 (应用/测试)
 set(BIN_APP_DIR ${PROJECT_SOURCE_DIR}/bin)
@@ -165,3 +173,5 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 # 设置 app 可执行产物输出
 set_target_properties(im_server PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_APP_DIR})
+set_target_properties(gateway_ws PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_APP_DIR})
+set_target_properties(gateway_http PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_APP_DIR})

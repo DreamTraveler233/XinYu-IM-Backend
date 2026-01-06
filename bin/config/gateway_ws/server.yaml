@@ -1,19 +1,8 @@
 servers:
-    # HTTP 资源服务器配置
-    - address: ["0.0.0.0:8080"]
-      type: http
-      name: IM-http/1.1
-      keepalive: 1
-      timeout: 1000
-      # 分配工作池：
-      accept_worker: accept
-      io_worker: http_worker
-      process_worker:  http_worker
-
     # WebSocket 通讯服务器配置
     - address: ["0.0.0.0:8081"]
       type: ws
-      name: IM-ws/1.0
+      name: IM-ws-gateway/1.0
       # WS 链路是长连接，请设置更长的读超时，避免握手后无应用帧即被关闭
       timeout: 120000  # 120s
       # 分配工作池：
@@ -21,10 +10,10 @@ servers:
       io_worker: ws_worker
       process_worker:  ws_worker
 
-    # Rock RPC 服务器配置 (用于分布式节点间通信)
+    # Rock RPC 服务器配置 (用于接收后端服务的推送指令)
     - address: ["0.0.0.0:8060"]
       type: rock
-      name: IM-rpc/1.0
+      name: IM-ws-gateway-rpc/1.0
       timeout: 5000
       # 分配工作池：
       accept_worker: accept

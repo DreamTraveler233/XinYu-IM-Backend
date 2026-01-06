@@ -1,0 +1,20 @@
+# 媒体文件相关配置
+media:
+  # 存储上传文件的基本目录（相对于当前工作目录或使用绝对路径）
+  # 最终文件路径将放在 base_dir/YYYY/MM/DD/<id>.<ext>
+  # 推荐生产部署路径（可选）：/var/lib/im/media 或 /var/lib/im/uploads
+  # 使用绝对路径可以避免因工作目录变更导致路径不一致
+  # 默认使用 /var/lib/im/media（如需要可改为绝对路径或相对 server.work_path）
+  upload_base_dir: /var/lib/im/media
+
+  # 分片上传临时目录
+  temp_base_dir: /var/lib/im/media/tmp
+
+  # 默认分片大小（字节）；可覆盖 MediaService 中的默认值
+  shard_size_default: 5242880  # 5MB
+
+  # 临时目录清理配置（秒）
+  # 例如：temp_cleanup_interval: 3600  # 每小时扫描一次
+  temp_cleanup_interval: 3600
+  # 临时目录最长保留时间（秒），超过该时长将被删除，默认 24 小时
+  temp_retention_secs: 86400

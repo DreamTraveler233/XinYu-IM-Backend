@@ -1,6 +1,6 @@
 server:
-    work_path: bin/apps/work/IM
-    pid_file: IM.pid
+    work_path: bin/apps/work/gateway_http
+    pid_file: gateway_http.pid
 
 # 认证与安全配置
 auth:

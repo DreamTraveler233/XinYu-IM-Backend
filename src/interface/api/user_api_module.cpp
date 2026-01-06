@@ -464,4 +464,9 @@ bool UserApiModule::onServerReady() {
     return true;
 }
 
+bool UserApiModule::onServerUp() {
+    registerService("http", "im", "http");
+    return true;
+}
+
 }  // namespace IM::api
