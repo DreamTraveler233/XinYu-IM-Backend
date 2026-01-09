@@ -1,8 +1,12 @@
 build/
-bin/app/
+bin/im_*
+bin/tests/
+bin/log/
+bin/apps/
+lib/
 .vscode/
-*.so
 *.tmp
 *.log
 *.rl.cpp
 *.pem
+.venv/

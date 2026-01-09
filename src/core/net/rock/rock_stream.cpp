@@ -4,6 +4,7 @@
 #include "core/base/macro.hpp"
 #include "core/util/time_util.hpp"
 #include "core/io/worker.hpp"
+#include "core/util/trace_context.hpp"
 
 namespace IM {
 static Logger::ptr g_logger = IM_LOG_NAME("system");
@@ -45,6 +46,9 @@ int32_t RockStream::sendMessage(Message::ptr msg) {
 
 RockResult::ptr RockStream::request(RockRequest::ptr req, uint32_t timeout_ms) {
     if (isConnected()) {
+        if (req->getTraceId().empty()) {
+            req->setTraceId(TraceContext::GetTraceId());
+        }
         RockCtx::ptr ctx(new RockCtx);
         ctx->request = req;
         ctx->sn = req->getSn();
@@ -134,10 +138,10 @@ AsyncSocketStream::Ctx::ptr RockStream::doRecv() {
 }
 
 void RockStream::handleRequest(RockRequest::ptr req) {
+    TraceGuard guard(req->getTraceId());
     RockResponse::ptr rsp = req->createResponse();
     if (!m_requestHandler(req, rsp, std::dynamic_pointer_cast<RockStream>(shared_from_this()))) {
         sendMessage(rsp);
-        // innerClose();
         close();
     } else {
         sendMessage(rsp);
@@ -145,8 +149,8 @@ void RockStream::handleRequest(RockRequest::ptr req) {
 }
 
 void RockStream::handleNotify(RockNotify::ptr nty) {
+    TraceGuard guard(nty->getTraceId());
     if (!m_notifyHandler(nty, std::dynamic_pointer_cast<RockStream>(shared_from_this()))) {
-        // innerClose();
         close();
     }
 }

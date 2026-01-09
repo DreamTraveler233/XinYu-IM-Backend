@@ -3,6 +3,7 @@
 #include <cstdarg>
 
 #include "core/log/logger.hpp"
+#include "core/util/trace_context.hpp"
 
 namespace IM {
 LogEvent::LogEvent(std::shared_ptr<Logger> logger, Level level, const char* file_name, int32_t line,
@@ -16,7 +17,9 @@ LogEvent::LogEvent(std::shared_ptr<Logger> logger, Level level, const char* file
       m_CoroutineId(coroutine_id),
       m_time(time),
       m_level(level),
-      m_logger(logger) {}
+      m_logger(logger) {
+    m_traceId = TraceContext::GetTraceId();
+}
 const char* LogEvent::getFileName() const {
     return m_fileName;
 }

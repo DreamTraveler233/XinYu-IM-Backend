@@ -3,6 +3,7 @@
 #include "core/net/http/servlets/config_servlet.hpp"
 #include "core/base/macro.hpp"
 #include "core/net/http/servlets/status_servlet.hpp"
+#include "core/util/trace_context.hpp"
 
 namespace IM::http {
 
@@ -42,10 +43,18 @@ void HttpServer::handleClient(Socket::ptr client) {
             break;
         }
 
+        /* 设置 Trace ID */
+        std::string trace_id = req->getHeader("X-Trace-ID");
+        if (trace_id.empty()) {
+            trace_id = TraceContext::GenerateTraceId();
+        }
+        TraceGuard guard(trace_id);
+
         /* 处理 HTTP 请求 */
         HttpResponse::ptr rsp(
             new HttpResponse(req->getVersion(), req->isClose() || !m_isKeepalive));
         rsp->setHeader("Server", getName());
+        rsp->setHeader("X-Trace-ID", trace_id);
         m_dispatch->handle(req, rsp, session);  // 路由分发
         session->sendResponse(rsp);             // 发送响应数据
 

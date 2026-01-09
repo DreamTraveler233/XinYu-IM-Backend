@@ -5,8 +5,8 @@
 namespace IM {
 Logger::Logger(const std::string& name) : m_name(name), m_level(Level::DEBUG) {
     IM_ASSERT(!name.empty());
-    // 时间 线程名称 线程号 协程号 [日志级别] [日志器名称] <文件名:行号> 日志信息 回车
-    m_formatter = std::make_shared<LogFormatter>("%d%T%N%T%t%T%F%T[%p]%T[%c]%T<%f:%l>%T%m%n");
+    // 时间 线程名称 线程号 协程号 TraceID [日志级别] [日志器名称] <文件名:行号> 日志信息 回车
+    m_formatter = std::make_shared<LogFormatter>("%d%T%N%T%t%T%F%T%i%T[%p]%T[%c]%T<%f:%l>%T%m%n");
 }
 
 /**

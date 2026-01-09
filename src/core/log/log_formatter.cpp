@@ -111,6 +111,7 @@ void LogFormatter::init() {
         XX(l, LineFormatItem),        // %l -- 行号
         XX(T, TabFormatItem),         // %T -- Tab
         XX(F, FiberIdFormatItem),     // %F -- 协程ID
+        XX(i, TraceIdFormatItem),     // %i -- TraceID
 #undef XX
     };
 
@@ -197,4 +198,8 @@ void StringFormatItem::format(std::ostream& os, std::shared_ptr<LogEvent> event)
 void ThreadNameFormatItem::format(std::ostream& os, std::shared_ptr<LogEvent> event) {
     os << event->getThreadName();
 }
+void TraceIdFormatItem::format(std::ostream& os, std::shared_ptr<LogEvent> event) {
+    os << event->getTraceId();
+}
+
 }  // namespace IM

@@ -21,6 +21,12 @@ class Message {
     virtual std::string toString() const = 0;
     virtual const std::string& getName() const = 0;
     virtual int32_t getType() const = 0;
+
+    const std::string& getTraceId() const { return m_traceId; }
+    void setTraceId(const std::string& v) { m_traceId = v; }
+
+   protected:
+    std::string m_traceId;
 };
 
 class MessageDecoder {

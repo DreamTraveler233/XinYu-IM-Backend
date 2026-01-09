@@ -17,12 +17,14 @@ bool Request::serializeToByteArray(ByteArray::ptr bytearray) {
     bytearray->writeFuint8(getType());
     bytearray->writeUint32(m_sn);
     bytearray->writeUint32(m_cmd);
+    bytearray->writeStringVint(m_traceId);
     return true;
 }
 
 bool Request::parseFromByteArray(ByteArray::ptr bytearray) {
     m_sn = bytearray->readUint32();
     m_cmd = bytearray->readUint32();
+    m_traceId = bytearray->readStringVint();
     return true;
 }
 
@@ -34,6 +36,7 @@ bool Response::serializeToByteArray(ByteArray::ptr bytearray) {
     bytearray->writeUint32(m_cmd);
     bytearray->writeUint32(m_result);
     bytearray->writeStringVint(m_resultStr);
+    bytearray->writeStringVint(m_traceId);
     return true;
 }
 
@@ -42,6 +45,7 @@ bool Response::parseFromByteArray(ByteArray::ptr bytearray) {
     m_cmd = bytearray->readUint32();
     m_result = bytearray->readUint32();
     m_resultStr = bytearray->readStringVint();
+    m_traceId = bytearray->readStringVint();
     return true;
 }
 
@@ -50,11 +54,13 @@ Notify::Notify() : m_notify(0) {}
 bool Notify::serializeToByteArray(ByteArray::ptr bytearray) {
     bytearray->writeFuint8(getType());
     bytearray->writeUint32(m_notify);
+    bytearray->writeStringVint(m_traceId);
     return true;
 }
 
 bool Notify::parseFromByteArray(ByteArray::ptr bytearray) {
     m_notify = bytearray->readUint32();
+    m_traceId = bytearray->readStringVint();
     return true;
 }
 

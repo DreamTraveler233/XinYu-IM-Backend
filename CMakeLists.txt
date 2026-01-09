@@ -167,27 +167,22 @@ add_executable(im_svc_presence src/bootstrap/svc_presence.cpp)
 add_dependencies(im_svc_presence IM)
 target_link_libraries(im_svc_presence PRIVATE IM)
 
-# Stage 4: contact service (query)
 add_executable(im_svc_contact src/bootstrap/svc_contact.cpp)
 add_dependencies(im_svc_contact IM)
 target_link_libraries(im_svc_contact PRIVATE IM)
 
-# Stage 4: user service
 add_executable(im_svc_user src/bootstrap/svc_user.cpp)
 add_dependencies(im_svc_user IM)
 target_link_libraries(im_svc_user PRIVATE IM)
 
-# Stage 4: group service
 add_executable(im_svc_group src/bootstrap/svc_group.cpp)
 add_dependencies(im_svc_group IM)
 target_link_libraries(im_svc_group PRIVATE IM)
 
-# Stage 4: talk service
 add_executable(im_svc_talk src/bootstrap/svc_talk.cpp)
 add_dependencies(im_svc_talk IM)
 target_link_libraries(im_svc_talk PRIVATE IM)
 
-# Stage 4/5: media service
 add_executable(im_svc_media src/bootstrap/svc_media.cpp)
 add_dependencies(im_svc_media IM)
 target_link_libraries(im_svc_media PRIVATE IM)

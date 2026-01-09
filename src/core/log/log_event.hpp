@@ -96,6 +96,12 @@ class LogEvent {
     uint64_t getTime() const;
 
     /**
+     * @brief 获取Trace ID
+     * @return Trace ID
+     */
+    const std::string& getTraceId() const { return m_traceId; }
+
+    /**
          * @brief 获取日志消息内容
          * @return 日志消息内容
          */
@@ -144,6 +150,7 @@ class LogEvent {
     std::stringstream m_messageSS;     ///< 日志消息流
     Level m_level;                     ///< 日志等级
     std::shared_ptr<Logger> m_logger;  ///< 关联的日志器
+    std::string m_traceId;             ///< Trace ID
 };
 
 /**

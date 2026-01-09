@@ -355,6 +355,27 @@ class FiberIdFormatItem : public LogFormatter::FormatItem {
 };
 
 /**
+     * @class TraceIdFormatItem
+     * @brief TraceID格式化项
+     *
+     * 负责格式化TraceID，对应格式符%i
+     */
+class TraceIdFormatItem : public LogFormatter::FormatItem {
+   public:
+    /**
+         * @brief 默认构造函数
+         */
+    TraceIdFormatItem() = default;
+
+    /**
+         * @brief 格式化日志事件内容到输出流
+         * @param[in] os 输出流
+         * @param[in] event 日志事件智能指针
+         */
+    void format(std::ostream& os, std::shared_ptr<LogEvent> event) override;
+};
+
+/**
      * @class StringFormatItem
      * @brief 字符串格式化项
      *

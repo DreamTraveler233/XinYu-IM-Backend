@@ -28,6 +28,7 @@ std::shared_ptr<RockResponse> RockRequest::createResponse() {
     RockResponse::ptr rt(new RockResponse);
     rt->setSn(m_sn);
     rt->setCmd(m_cmd);
+    rt->setTraceId(m_traceId);
     return rt;
 }
 

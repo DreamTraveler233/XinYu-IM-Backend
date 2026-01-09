@@ -16,6 +16,7 @@
 #include "core/net/http/ws_session.hpp"
 #include "core/system/application.hpp"
 #include "core/util/util.hpp"
+#include "core/util/trace_context.hpp"
 #include "domain/repository/talk_repository.hpp"
 #include "application/rpc/talk_repository_rpc_client.hpp"
 
@@ -478,6 +479,12 @@ bool WsGatewayModule::onServerReady() {
             const std::string event = IM::JsonUtil::GetString(root, "event");
             const Json::Value payload =
                 root.isMember("payload") ? root["payload"] : Json::Value(Json::objectValue);
+
+            std::string trace_id = IM::JsonUtil::GetString(root, "trace_id");
+            if (trace_id.empty()) {
+                trace_id = TraceContext::GenerateTraceId();
+            }
+            TraceGuard guard(trace_id);
 
             // 2) 内置事件处理
             if (event == "ping") {
