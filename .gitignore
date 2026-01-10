@@ -3,10 +3,10 @@ bin/im_*
 bin/tests/
 bin/log/
 bin/apps/
+bin/keys/
 lib/
 .vscode/
 *.tmp
 *.log
 *.rl.cpp
-*.pem
 .venv/
